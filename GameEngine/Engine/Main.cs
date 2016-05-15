@@ -16,7 +16,7 @@ namespace GameEngine
             if (instance == null)
                 return;
 
-            instance.SetGame(new GameDemo()); //X implements AbstractGame
+            new X(); //X implements AbstractGame and subscribes himself to the game engine
 
             instance.Run();
 

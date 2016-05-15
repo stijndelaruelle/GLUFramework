@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 
 namespace GameEngine
 {
-    public class GameDemo : AbstractGame
+    public class X : AbstractGame
     {
         private Ball m_Ball;
         private Ball m_Ball2;
-        private Hero m_Hero;
+        //private Hero m_Hero;
+
+        private Button m_Button;
 
         public override void GameStart()
         {
@@ -22,23 +24,30 @@ namespace GameEngine
             m_Ball2.SetColor(255, 255, 0);
             m_Ball2.SetSpeed(500.0f);
 
-            m_Hero = new Hero(250, 250);
+            //m_Hero = new Hero(250, 250);
+            //m_Button = new Button(OnClick, "Hallo!", new Rectangle(50, 50, 100, 100));
+            //m_Button.SetCornerRadius(new Vector2(20, 20));
+
+            Bitmap bitmap = new Bitmap("button.png");
+            m_Button = new Button(OnClick, "", new Rectangle(50, 50, 150, 50));
+            m_Button.SetBitmap(bitmap);
         }
 
         public override void Update()
         {
             m_Ball.Update();
             m_Ball2.Update();
-
-            m_Hero.Update();
         }
 
         public override void Paint()
         {
             m_Ball.Paint();
             m_Ball2.Paint();
+        }
 
-            m_Hero.Paint();
+        private void OnClick()
+        {
+            Console.WriteLine("Clicked!");
         }
     }
 }

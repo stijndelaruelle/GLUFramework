@@ -248,6 +248,10 @@ namespace GameEngine
         {
             get { return new Color(0, 0, 255); }
         }
+        public static Color Gray
+        {
+            get { return new Color(128, 128, 128); }
+        }
 
         private int m_R;
         public int R
@@ -388,8 +392,8 @@ namespace GameEngine
         //Singleton
         private static GameEngine m_Instance;
 
-        //Game instance
-        private AbstractGame m_GameInstance;
+        //Subscribed game objects
+        private List<GameObject> m_GameObjects;
 
         //DirectX
         private RenderForm m_RenderForm;
@@ -407,7 +411,7 @@ namespace GameEngine
 
         //Window properties
         private string m_Title = "Why did you remove the SetTitle line in AbstractGame?";
-        private string m_IconPath = "../../icon.ico";
+        private string m_IconPath = "../../Assets/icon.ico";
         private int m_Width = 800;
         private int m_Height = 600;
         private SharpDX.Color m_ClearColor = new SharpDX.Color(255, 255, 255);
@@ -430,12 +434,16 @@ namespace GameEngine
         //Core
         public GameEngine()
         {
+            m_GameObjects = new List<GameObject>();
         }
 
         public void Dispose()
         {
             //This is the destructor
-            m_GameInstance.GameEnd();
+            for (int i = m_GameObjects.Count - 1; i >= 0; --i)
+                m_GameObjects[i].GameEnd();
+
+            m_GameObjects.Clear();
 
             m_RenderForm.Dispose();
 
@@ -516,19 +524,21 @@ namespace GameEngine
 
         public void Run()
         {
-            if (m_GameInstance == null)
+            if (m_GameObjects.Count == 0)
             {
-                LogError("We are trying to run an undefined game! Check if SetGame is called correctly!");
+                LogError("We are trying to run an undefined game!");
                 return;
             }
 
             //Initialize the game
-            m_GameInstance.GameInitialize();
+            foreach (GameObject go in m_GameObjects)
+                go.GameInitialize();
 
             //Initialize the engine (window)
             CreateWindow();
 
-            m_GameInstance.GameStart();
+            for (int i = m_GameObjects.Count - 1; i >= 0; --i)
+                m_GameObjects[i].GameStart();
 
             //Start the core game / renderloop
             m_Stopwatch = new Stopwatch();
@@ -541,11 +551,16 @@ namespace GameEngine
 
                 //Update
                 m_InputManager.Update();
-                m_GameInstance.Update();
+
+                foreach (GameObject go in m_GameObjects)
+                    go.Update();
 
                 //Draw
                 m_CanIPaint = true;
-                m_GameInstance.Paint();
+
+                foreach (GameObject go in m_GameObjects)
+                    go.Paint();
+
                 m_CanIPaint = false;
 
                 m_RenderTarget.EndDraw();
@@ -565,6 +580,16 @@ namespace GameEngine
             }
 
             return m_CanIPaint;
+        }
+
+        public void SubscribeGameObject(GameObject go)
+        {
+            m_GameObjects.Add(go);
+        }
+
+        public void UnsubscribeGameObject(GameObject go)
+        {
+            m_GameObjects.Remove(go);
         }
 
         //Window mutators & accessors (we are not using C# properties to make everything more clear.)
@@ -587,11 +612,6 @@ namespace GameEngine
         public int GetHeight()
         {
             return m_Height;
-        }
-
-        public void SetGame(AbstractGame gameInstance)
-        {
-            m_GameInstance = gameInstance;
         }
 
         public void SetTitle(string title)
@@ -1099,6 +1119,30 @@ namespace GameEngine
         }
     }
 
+    public class GameObject
+    {
+        private GameEngine m_GameEngine;
+        protected GameEngine GAME_ENGINE
+        {
+            get { return m_GameEngine; }
+        }
+
+        public GameObject()
+        {
+            m_GameEngine = GameEngine.GetInstance();
+            m_GameEngine.SubscribeGameObject(this);
+        }
+
+        public virtual void GameInitialize() { }
+        public virtual void GameStart() { }
+        public virtual void GameEnd()
+        {
+            m_GameEngine.UnsubscribeGameObject(this);
+        }
+        public virtual void Update() { }
+        public virtual void Paint() { }
+    }
+
     public class Bitmap : IDisposable
     {
         private SharpDX.Direct2D1.Bitmap m_D2DBitmap;
@@ -1109,7 +1153,7 @@ namespace GameEngine
 
         public Bitmap(string filePath)
         {
-            LoadBitmap(filePath);
+            LoadBitmap("../../Assets/" + filePath);
         }
 
         public void Dispose()
@@ -1139,6 +1183,13 @@ namespace GameEngine
 
     public class Font : IDisposable
     {
+        public enum Alignment
+        {
+            Left,
+            Right,
+            Center
+        }
+
         private SharpDX.DirectWrite.TextFormat m_TextFormat;
         public SharpDX.DirectWrite.TextFormat TextFormat
         {
@@ -1161,6 +1212,279 @@ namespace GameEngine
             SharpDX.DirectWrite.Factory fontFactory = new SharpDX.DirectWrite.Factory();
             m_TextFormat = new SharpDX.DirectWrite.TextFormat(fontFactory, fontName, size);
             fontFactory.Dispose();
+        }
+        
+        public void SetHorizontalAlignment(Alignment alignment)
+        {
+            m_TextFormat.TextAlignment = (SharpDX.DirectWrite.TextAlignment)alignment;
+        }
+
+        public void SetVerticalAlignment(Alignment alignment)
+        {
+            m_TextFormat.ParagraphAlignment = (SharpDX.DirectWrite.ParagraphAlignment)alignment;
+        }
+    }
+
+    public class Button : GameObject
+    {
+        public delegate void ButtonCallback();
+
+        //State
+        private Font m_DefaultFont;
+        private Font m_Font;
+        private Bitmap m_Bitmap; //Instead of colors we can also use a bitmap as the background
+
+        private bool m_IsHovering;
+        private bool m_IsClicked;
+
+        //Required
+        private string m_Text = "Button";
+        private Rectangle m_Rectangle = new Rectangle(0, 0, 100, 25);
+        private ButtonCallback m_Callback;
+
+        //Extra settings
+        private Color m_ForegroundColor = Color.Black;
+        private Color m_BackgroundColor = Color.White;
+        private Color m_BorderColor = Color.Black;
+
+        private Color m_HoverForegroundColor = Color.Black;
+        private Color m_HoverBackgroundColor = new Color(245, 245, 245);
+        private Color m_HoverBorderColor = Color.Black;
+
+        private Color m_ClickForegroundColor = Color.Black;
+        private Color m_ClickBackgroundColor = new Color(200, 200, 200);
+        private Color m_ClickBorderColor = Color.Black;
+
+        private Vector2 m_CornerRadius = new Vector2(0, 0);
+
+
+        //Functions
+        public Button(ButtonCallback callback) : base()
+        {
+            Initialize(callback, "Button", new Rectangle(0, 0, 100, 25));
+        }
+
+        public Button(ButtonCallback callback, string text, int x, int y, int width, int height) : base()
+        {
+            Initialize(callback, text, new Rectangle(x, y, width, height));
+        }
+
+        public Button(ButtonCallback callback, string text, Rectangle rectangle) : base()
+        {
+            Initialize(callback, text, rectangle);
+        }
+
+        private void Initialize(ButtonCallback callback, string text, Rectangle rectangle)
+        {
+            m_Text = text;
+            m_Rectangle = rectangle;
+            m_Callback = callback;
+
+            m_DefaultFont = new Font("Arial", 12.0f);
+            m_DefaultFont.SetHorizontalAlignment(Font.Alignment.Center);
+            m_DefaultFont.SetVerticalAlignment(Font.Alignment.Center);
+
+            m_Font = m_DefaultFont;
+        }
+
+        public override void GameEnd()
+        {
+            m_DefaultFont.Dispose();
+
+            if (m_Bitmap != null)
+                m_Bitmap.Dispose();
+
+            GAME_ENGINE.UnsubscribeGameObject(this);
+        }
+
+        public override void Update()
+        {
+            //Check if the mouse position is colliding with our button
+            Vector2 mousePosition = GAME_ENGINE.GetMousePosition();
+
+            m_IsClicked = false;
+            m_IsHovering = (!(mousePosition.X < m_Rectangle.X ||
+                              mousePosition.X > (m_Rectangle.X + m_Rectangle.Width) ||
+                              mousePosition.Y < m_Rectangle.Y ||
+                              mousePosition.Y > (m_Rectangle.Y + m_Rectangle.Height)));
+
+            if (m_IsHovering)
+            {
+                m_IsClicked = GAME_ENGINE.GetMouseButton(0);
+
+                if (GAME_ENGINE.GetMouseButtonUp(0))
+                {
+                    if (m_Callback != null)
+                        m_Callback();
+                }
+            }
+        }
+
+        public override void Paint()
+        {
+            Color fgColor = m_ForegroundColor;
+            Color bgColor = m_BackgroundColor;
+            Color borderColor = m_BorderColor;
+
+            if (m_IsHovering)
+            {
+                fgColor = m_HoverForegroundColor;
+                bgColor = m_HoverBackgroundColor;
+                borderColor = m_HoverBorderColor;
+            }
+
+            if (m_IsClicked)
+            {
+                fgColor = m_ClickForegroundColor;
+                bgColor = m_ClickBackgroundColor;
+                borderColor = m_ClickBorderColor;
+            }
+
+            if (m_Bitmap != null)
+            {
+                DrawBitmapButton();
+            }
+            else
+            {
+                if (m_CornerRadius.X == 0 && m_CornerRadius.Y == 0)
+                    DrawRectangleButton(bgColor, borderColor);
+                else
+                    DrawRoundedRectangleButton(bgColor, borderColor);
+            }
+
+            //Text
+            GAME_ENGINE.SetColor(fgColor);
+            GAME_ENGINE.DrawString(m_Font, m_Text, m_Rectangle);
+        }
+
+        private void DrawRectangleButton(Color backgroundColor, Color borderColor)
+        {
+            //Background
+            GAME_ENGINE.SetColor(backgroundColor);
+            GAME_ENGINE.FillRectangle(m_Rectangle);
+
+            //Border
+            GAME_ENGINE.SetColor(borderColor);
+            GAME_ENGINE.DrawRectangle(m_Rectangle);
+        }
+
+        private void DrawRoundedRectangleButton(Color backgroundColor, Color borderColor)
+        {
+            //Background
+            GAME_ENGINE.SetColor(backgroundColor);
+            GAME_ENGINE.FillRoundedRectangle(m_Rectangle, m_CornerRadius);
+
+            //Border
+            GAME_ENGINE.SetColor(borderColor);
+            GAME_ENGINE.DrawRoundedRectangle(m_Rectangle, m_CornerRadius);
+        }
+
+        private void DrawBitmapButton()
+        {
+            int yOffset = 0;
+            if (m_IsHovering) yOffset += m_Rectangle.Height;
+            if (m_IsClicked)  yOffset += m_Rectangle.Height;
+
+            GAME_ENGINE.DrawBitmap(m_Bitmap, m_Rectangle.X, m_Rectangle.Y, 0, yOffset, m_Rectangle.Width, m_Rectangle.Height);
+        }
+
+
+        //Mutators & Accessors
+        public void SetCallback(ButtonCallback callback)
+        {
+            m_Callback = callback;
+        }
+
+        public void SetText(string text)
+        {
+            m_Text = text;
+        }
+
+        public void SetPosition(int x, int y)
+        {
+            m_Rectangle = new Rectangle(x, y, m_Rectangle.Width, m_Rectangle.Height);
+        }
+
+        public void SetSize(int width, int height)
+        {
+            m_Rectangle = new Rectangle(m_Rectangle.X, m_Rectangle.Y, width, height);
+        }
+
+        public void SetRectangle(int x, int y, int width, int height)
+        {
+            m_Rectangle = new Rectangle(x, y, width, height);
+        }
+
+        public void SetRectangle(Rectangle rectangle)
+        {
+            m_Rectangle = rectangle;
+        }
+
+
+        public void SetForegroundColor(Color color)
+        {
+            m_ForegroundColor = color;
+        }
+
+        public void SetBackgroundColor(Color color)
+        {
+            m_BackgroundColor = color;
+        }
+
+        public void SetBorderColor(Color color)
+        {
+            m_BorderColor = color;
+        }
+
+        public void SetHoverForegroundColor(Color color)
+        {
+            m_HoverForegroundColor = color;
+        }
+
+        public void SetHoverBackgroundColor(Color color)
+        {
+            m_HoverBackgroundColor = color;
+        }
+
+        public void SetHoverBorderColor(Color color)
+        {
+            m_HoverBorderColor = color;
+        }
+
+        public void SetClickForegroundColor(Color color)
+        {
+            m_ClickForegroundColor = color;
+        }
+
+        public void SetClickBackgroundColor(Color color)
+        {
+            m_ClickBackgroundColor = color;
+        }
+
+        public void SetClickBorderColor(Color color)
+        {
+            m_ClickBorderColor = color;
+        }
+
+
+        public void SetBitmap(string filepath)
+        {
+            m_Bitmap = new Bitmap(filepath);
+        }
+
+        public void SetBitmap(Bitmap bitmap)
+        {
+            m_Bitmap = bitmap;
+        }
+
+        public void SetFont(Font font)
+        {
+            m_Font = font;
+        }
+
+        public void SetCornerRadius(Vector2 radius)
+        {
+            m_CornerRadius = radius;
         }
     }
 }

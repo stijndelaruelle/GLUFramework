@@ -86,16 +86,16 @@
   <ItemGroup>
     <Compile Include="Engine\AbstractGame.cs" />
     <Compile Include="Engine\GameEngine.cs" />
-    <Compile Include="Engine\GameObject.cs" />
     <Compile Include="Engine\Main.cs" />
     <Compile Include="Game\Ball.cs" />
-    <Compile Include="Game\GameDemo.cs" />
+    <Compile Include="Game\X.cs" />
     <Compile Include="Game\Hero.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Engine\App.config" />
     <None Include="Engine\packages.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
