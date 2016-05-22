@@ -16,6 +16,8 @@ using SharpDX.Mathematics.Interop;
 using SharpDX.WIC;
 using SharpDX.IO;
 
+using NAudio.Wave;
+
 using D3D11 = SharpDX.Direct3D11;
 using Device = SharpDX.Direct3D11.Device;
 using D2DFactory = SharpDX.Direct2D1.Factory;
@@ -23,7 +25,7 @@ using DXGIFactory = SharpDX.DXGI.Factory;
 using AlphaMode = SharpDX.Direct2D1.AlphaMode;
 using System.Windows.Forms;
 using Color = SharpDX.Color;
-
+using NAudio.Wave.SampleProviders;
 
 namespace GameEngine
 {
@@ -408,6 +410,7 @@ namespace GameEngine
 
         //Subdevisions
         private InputManager m_InputManager;
+        private AudioManager m_AudioManager;
 
         //Window properties
         private string m_Title = "Why did you remove the SetTitle line in AbstractGame?";
@@ -453,6 +456,8 @@ namespace GameEngine
             m_Factory.Dispose();
 
             m_DefaultFont.Dispose();
+
+            m_AudioManager.Dispose();
         }
 
         private void CreateWindow()
@@ -464,8 +469,9 @@ namespace GameEngine
 
             InitializeDeviceResources();
 
-            //Initialize the input manager
+            //Initialize the external managers
             m_InputManager = new InputManager(m_RenderForm);
+            m_AudioManager = new AudioManager(44100, 2);
 
             //Default the brush & font
             m_CurrentBrush = new SolidColorBrush(m_RenderTarget, SharpDX.Color.Black);
@@ -604,12 +610,12 @@ namespace GameEngine
             return m_LastDeltaTime;
         }
 
-        public int GetWidth()
+        public int GetScreenWidth()
         {
             return m_Width;
         }
 
-        public int GetHeight()
+        public int GetScreenHeight()
         {
             return m_Height;
         }
@@ -848,6 +854,11 @@ namespace GameEngine
             m_RenderTarget.Transform = SharpDX.Matrix3x2.Translation(0, 0);
         }
 
+        public void DrawBitmap(Bitmap bitmap, int x, int y, Rectangle sourceRect)
+        {
+            DrawBitmap(bitmap, x, y, sourceRect.X, sourceRect.Y, sourceRect.Width, sourceRect.Height);
+        }
+
         public void DrawBitmap(Bitmap bitmap, Vector2 position, Rectangle sourceRect)
         {
             DrawBitmap(bitmap, position.X, position.Y, sourceRect.X, sourceRect.Y, sourceRect.Width, sourceRect.Height);
@@ -880,8 +891,6 @@ namespace GameEngine
         {
             DrawString(font, text, rect.X, rect.Y, rect.Width, rect.Height);
         }
-
-        //Camera methods
 
         //Input methods
         public bool GetKey(Key key)
@@ -932,6 +941,36 @@ namespace GameEngine
             Console.WriteLine("ERROR: " + message);
             Console.ForegroundColor = ConsoleColor.White;
         }
+
+        //Audio methods
+        public void PlayAudio(Audio audio)
+        {
+            m_AudioManager.PlayAudio(audio);
+        }
+
+        public void StopAudio(Audio audio)
+        {
+            m_AudioManager.StopAudio(audio);
+        }
+
+        public void SetVolume(float volume)
+        {
+            if (volume < 0.0f)
+            {
+                LogError("The volume cannot be lower than 0.0");
+                return;
+            }
+
+            if (volume > 1.0f)
+            {
+                LogError("The volume cannot be higher than 1.0");
+                return;
+            }
+
+            m_AudioManager.SetVolume(volume);
+        }
+
+        //Camera methods
 
         private class InputManager
         {
@@ -1117,6 +1156,61 @@ namespace GameEngine
                 }
             }
         }
+
+        private class AudioManager
+        {
+            private WaveOut m_OutputDevice;
+            private MixingSampleProvider m_Mixer;
+
+            public AudioManager(int sampleRate, int channelCount)
+            {
+                m_OutputDevice = new WaveOut();
+
+                m_Mixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(sampleRate, channelCount));
+                m_Mixer.ReadFully = true;
+                m_Mixer.RemoveAllMixerInputs();
+
+                m_OutputDevice.Init(m_Mixer);
+                m_OutputDevice.Play();
+            }
+
+            public void Dispose()
+            {
+                m_OutputDevice.Stop();
+                m_OutputDevice.Dispose();
+            }
+
+            public void PlayAudio(Audio audio)
+            {
+                m_Mixer.AddMixerInput(ConvertToRightChannelCount(audio));
+            }
+
+            public void StopAudio(Audio audio)
+            {
+                m_Mixer.RemoveMixerInput(ConvertToRightChannelCount(audio));
+            }
+
+            public void SetVolume(float volume)
+            {
+                m_OutputDevice.Volume = volume;
+            }
+
+            private ISampleProvider ConvertToRightChannelCount(ISampleProvider input)
+            {
+                if (input.WaveFormat.Channels == m_Mixer.WaveFormat.Channels)
+                {
+                    return input;
+                }
+
+                if (input.WaveFormat.Channels == 1 && m_Mixer.WaveFormat.Channels == 2)
+                {
+                    return new MonoToStereoSampleProvider(input);
+                }
+
+                GameEngine.GetInstance().LogError("No such channel conversion currently exists.");
+                return input;
+            }
+        }
     }
 
     public class GameObject
@@ -1178,6 +1272,22 @@ namespace GameEngine
 
             RenderTarget renderTarget = GameEngine.GetInstance().RenderTarget;
             m_D2DBitmap = SharpDX.Direct2D1.Bitmap1.FromWicBitmap(renderTarget, converter);
+        }
+
+        private void SetTransparancyColor(Color color)
+        {
+            //To be made, for now use PNG
+            //new SharpDX.Direct2D1.Effects.ColorManagement()
+        }
+
+        public int GetWidth()
+        {
+            return (int)m_D2DBitmap.Size.Width;
+        }
+
+        public int GetHeight()
+        {
+            return (int)m_D2DBitmap.Size.Height;
         }
     }
 
@@ -1485,6 +1595,103 @@ namespace GameEngine
         public void SetCornerRadius(Vector2 radius)
         {
             m_CornerRadius = radius;
+        }
+    }
+
+    public class Audio : IDisposable, ISampleProvider
+    {
+        private float[] m_OriginalData;
+        private float[] m_Data;
+        private long m_CurrentPosition;
+
+        private float m_Volume = 1.0f;
+        private bool m_IsLooping = false;
+
+        private WaveFormat m_WaveFormat;
+        public WaveFormat WaveFormat
+        {
+            get { return m_WaveFormat; }
+        }
+
+        public Audio(string filePath)
+        {
+            LoadAudio("../../Assets/" + filePath);
+        }
+
+        private void LoadAudio(string filePath)
+        {
+            using (AudioFileReader audioFileReader = new AudioFileReader(filePath))
+            {
+                //Make sure all audio uses the same samplerate
+                WaveToSampleProvider convStream = new WaveToSampleProvider(new MediaFoundationResampler(new SampleToWaveProvider(audioFileReader),
+                                                                                                        WaveFormat.CreateIeeeFloatWaveFormat(44100, 2)) { ResamplerQuality = 60 });
+
+                
+                m_WaveFormat = convStream.WaveFormat;
+
+                List<float> wholeFile = new List<float>((int)(audioFileReader.Length / 4));
+                float[] readBuffer = new float[convStream.WaveFormat.SampleRate * convStream.WaveFormat.Channels];
+
+                int samplesRead;
+                while ((samplesRead = convStream.Read(readBuffer, 0, readBuffer.Length)) > 0)
+                {
+                    wholeFile.AddRange(readBuffer.Take(samplesRead));
+                }
+
+                m_OriginalData = wholeFile.ToArray();
+                m_Data = m_OriginalData;
+            }
+        }
+
+        public void Dispose()
+        {
+
+        }
+
+        public void SetVolume(float volume)
+        {
+            //We'll just do this manually otherwise finding a way out of all these conversion classes (see LoadAudio) will be a nightmare.
+            //As long as we don't use this to fadeout we'll be fine.
+            for (int i = 0; i < m_OriginalData.Length; ++i)
+            {
+                m_Data[i] = m_OriginalData[i] * volume;
+            }
+        }
+
+        public void SetLooping(bool looping)
+        {
+            m_IsLooping = looping;
+        }
+
+        public float GetVolume()
+        {
+            return m_Volume;
+        }
+
+        public bool IsLooping()
+        {
+            return m_IsLooping;
+        }
+
+        //ISampleProvider
+        public int Read(float[] buffer, int offset, int count)
+        {
+            long availableSamples = m_Data.Length - m_CurrentPosition;
+
+            //Looping
+            if (availableSamples <= 0 && m_IsLooping == true)
+            {
+                m_CurrentPosition = 0;
+                availableSamples = m_Data.Length - m_CurrentPosition;
+            }
+
+            long samplesToCopy = Math.Min(availableSamples, count);
+
+            Array.Copy(m_Data, m_CurrentPosition, buffer, offset, samplesToCopy);
+
+            m_CurrentPosition += samplesToCopy;
+
+            return (int)samplesToCopy;
         }
     }
 }

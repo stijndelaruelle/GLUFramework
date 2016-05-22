@@ -58,7 +58,6 @@ E:\GLU\GameEngine\GameEngine\bin\Debug\SharpDX.Direct3D11.dll
 E:\GLU\GameEngine\GameEngine\bin\Debug\SharpDX.dll
 E:\GLU\GameEngine\GameEngine\bin\Debug\SharpDX.DXGI.dll
 E:\GLU\GameEngine\GameEngine\bin\Debug\SharpDX.Mathematics.dll
-E:\GLU\GameEngine\GameEngine\bin\Debug\SharpDX.XInput.dll
 E:\GLU\GameEngine\GameEngine\bin\Debug\SharpDX.xml
 E:\GLU\GameEngine\GameEngine\bin\Debug\SharpDX.D3DCompiler.xml
 E:\GLU\GameEngine\GameEngine\bin\Debug\SharpDX.Desktop.xml
@@ -67,6 +66,10 @@ E:\GLU\GameEngine\GameEngine\bin\Debug\SharpDX.Direct2D1.xml
 E:\GLU\GameEngine\GameEngine\bin\Debug\SharpDX.Direct3D11.xml
 E:\GLU\GameEngine\GameEngine\bin\Debug\SharpDX.DXGI.xml
 E:\GLU\GameEngine\GameEngine\bin\Debug\SharpDX.Mathematics.xml
-E:\GLU\GameEngine\GameEngine\bin\Debug\SharpDX.XInput.xml
 E:\GLU\GameEngine\GameEngine\obj\Debug\GameEngine.exe
 E:\GLU\GameEngine\GameEngine\obj\Debug\GameEngine.pdb
+E:\GLU\GameEngine\GameEngine\bin\Debug\libmp3lame.32.dll
+E:\GLU\GameEngine\GameEngine\bin\Debug\libmp3lame.64.dll
+E:\GLU\GameEngine\GameEngine\bin\Debug\NAudio.dll
+E:\GLU\GameEngine\GameEngine\bin\Debug\NAudio.Lame.dll
+E:\GLU\GameEngine\GameEngine\bin\Debug\NAudio.xml
