@@ -16,9 +16,7 @@ namespace GameEngine
             if (instance == null)
                 return;
 
-            //new X(); //X implements AbstractGame and subscribes himself to the game engine
-            //new PortedGame();
-            new PongGame();
+            new XYZ(); //XYZ implements AbstractGame and subscribes himself to the game engine
 
             instance.Run();
 

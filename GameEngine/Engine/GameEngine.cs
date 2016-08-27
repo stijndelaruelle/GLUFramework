@@ -30,6 +30,8 @@ using NAudio.Wave.SampleProviders;
 namespace GameEngine
 {
     //A stripped version of the System.Windows.Forms.Keys enum to avoid extra includes for students.
+    #region RawDataTypes
+
     public enum Key
     {
         //Modifiers = -65536,
@@ -389,6 +391,8 @@ namespace GameEngine
         }
     }
 
+    #endregion
+
     public class GameEngine : IDisposable
     {
         //Singleton
@@ -669,6 +673,8 @@ namespace GameEngine
                 return;
 
             SharpDX.Color color = new SharpDX.Color(r, g, b);
+
+            m_CurrentBrush.Dispose();
             m_CurrentBrush = new SolidColorBrush(m_RenderTarget, color);
         }
 
@@ -928,10 +934,16 @@ namespace GameEngine
             return m_InputManager.GetMousePosition();
         }
 
+        public void Log(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("DEBUG: " + message);
+        }
+
         public void LogWarning(string message)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("ERROR: " + message);
+            Console.WriteLine("WARNING: " + message);
             Console.ForegroundColor = ConsoleColor.White;
         }
 
@@ -970,7 +982,7 @@ namespace GameEngine
             m_AudioManager.SetVolume(volume);
         }
 
-        //Camera methods
+        //Camera methods TODO
 
         private class InputManager
         {
@@ -1212,6 +1224,8 @@ namespace GameEngine
             }
         }
     }
+
+    #region DataTypes
 
     public class GameObject
     {
@@ -1694,4 +1708,6 @@ namespace GameEngine
             return (int)samplesToCopy;
         }
     }
+
+    #endregion
 }

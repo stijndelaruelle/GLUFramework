@@ -98,7 +98,8 @@
     <Compile Include="Game\Demos\Pong\PongGame.cs" />
     <Compile Include="Game\Demos\Pong\ScoreManager.cs" />
     <Compile Include="Game\Demos\PortedGame.cs" />
-    <Compile Include="Game\X.cs" />
+    <Compile Include="Game\Demos\TVStuiter.cs" />
+    <Compile Include="Game\XYZ.cs" />
     <Compile Include="Game\Demos\Hero.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

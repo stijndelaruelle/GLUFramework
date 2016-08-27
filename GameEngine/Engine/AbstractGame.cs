@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GameEngine
 {
-    //Hides the basic setup from the X class.
+    //Hides the basic setup from the XYZ class.
     public class AbstractGame : GameObject
     {
         public override void GameInitialize()
