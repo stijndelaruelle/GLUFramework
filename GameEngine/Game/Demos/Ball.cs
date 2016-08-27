@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GameEngine
 {
-    class HappyBall : GameObject
+    class HappyBall : AbstractGame
     {
         Vector2f m_Position = Vector2f.zero;
         float m_Radius = 1.0f;
@@ -24,7 +24,7 @@ namespace GameEngine
             m_Radius = radius;
         }
 
-        public void Update()
+        public override void Update()
         {
             HandleInput();
             HandleMovement();
@@ -108,7 +108,7 @@ namespace GameEngine
             }
         }
 
-        public void Paint()
+        public override void Paint()
         {
             GAME_ENGINE.SetColor(m_Color);
 

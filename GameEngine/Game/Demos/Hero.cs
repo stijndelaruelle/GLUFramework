@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GameEngine
 {
-    public class Hero : GameObject
+    public class Hero : AbstractGame
     {
         private Bitmap m_Bitmap;
         private Font m_Font;
@@ -23,7 +23,7 @@ namespace GameEngine
             m_Font = new Font("Times New Roman", 15);
         }
 
-        public void Update()
+        public override void Update()
         {
             int dir = 0;
             if (GAME_ENGINE.GetKey(Key.A) || GAME_ENGINE.GetKey(Key.Left)) dir -= 1;
@@ -35,7 +35,7 @@ namespace GameEngine
             m_Position.X += (int)(dir * m_Speed * GAME_ENGINE.GetDeltaTime());
         }
 
-        public void Paint()
+        public override void Paint()
         {
             //Draw Jazz
             GAME_ENGINE.DrawBitmap(m_Bitmap, m_Position.X, m_Position.Y, 0, 0, 32, 36);
