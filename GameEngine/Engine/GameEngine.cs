@@ -352,37 +352,38 @@ namespace GameEngine
         }
     }
 
-    public struct Rectangle
+    //Vector4
+    public struct Rectanglef
     {
-        private int m_X;
-        public int X
+        private float m_X;
+        public float X
         {
             get { return m_X; }
             set { m_X = value; }
         }
 
-        private int m_Y;
-        public int Y
+        private float m_Y;
+        public float Y
         {
             get { return m_Y; }
             set { m_Y = value; }
         }
 
-        private int m_Width;
-        public int Width
+        private float m_Width;
+        public float Width
         {
             get { return m_Width; }
             set { m_Width = value; }
         }
 
-        private int m_Height;
-        public int Height
+        private float m_Height;
+        public float Height
         {
             get { return m_Height; }
             set { m_Height = value; }
         }
 
-        public Rectangle(int x, int y, int width, int height)
+        public Rectanglef(float x, float y, float width, float height)
         {
             m_X = x;
             m_Y = y;
@@ -684,204 +685,206 @@ namespace GameEngine
         }
 
         //Line
-        public void DrawLine(int startPointX, int startPointY, int endPointX, int endPointY)
+        public void DrawLine(float startPointX, float startPointY, float endPointX, float endPointY)
         {
             if (!PaintCheck())
                 return;
 
-            RawVector2 p1 = new RawVector2((float)startPointX, (float)startPointY);
-            RawVector2 p2 = new RawVector2((float)endPointX, (float)endPointY);
+            RawVector2 p1 = new RawVector2(startPointX, startPointY);
+            RawVector2 p2 = new RawVector2(endPointX, endPointY);
 
             m_RenderTarget.DrawLine(p1, p2, m_CurrentBrush);
         }
 
-        public void DrawLine(Vector2 startPoint, Vector2 endPoint)
+        public void DrawLine(Vector2f startPoint, Vector2f endPoint)
         {
             DrawLine(startPoint.X, startPoint.Y, endPoint.X, endPoint.Y);
         }
 
         //Rectangle
-        public void DrawRectangle(int x, int y, int width, int height)
+        public void DrawRectangle(float x, float y, float width, float height)
         {
             //Not using default parameters on purpose.
             DrawRectangle(x, y, width, height, 1);
         }
 
-        public void DrawRectangle(Rectangle rect)
+        public void DrawRectangle(Rectanglef rect)
         {
             DrawRectangle(rect.X, rect.Y, rect.Width, rect.Height);
         }
 
-        public void DrawRectangle(int x, int y, int width, int height, int strokeWidth)
+        public void DrawRectangle(float x, float y, float width, float height, float strokeWidth)
         {
             if (!PaintCheck())
                 return;
 
-            RawRectangleF rect = new RawRectangleF((float)x, (float)y, (float)(x + width), (float)(y + height));
-            m_RenderTarget.DrawRectangle(rect, m_CurrentBrush, (float)strokeWidth);
+            RawRectangleF rect = new RawRectangleF(x, y, (x + width), (y + height));
+            m_RenderTarget.DrawRectangle(rect, m_CurrentBrush, strokeWidth);
         }
 
-        public void DrawRectangle(Rectangle rect, int strokeWidth)
+        public void DrawRectangle(Rectanglef rect, float strokeWidth)
         {
             DrawRectangle(rect.X, rect.Y, rect.Width, rect.Height, strokeWidth);
         }
 
-        public void FillRectangle(int x, int y, int width, int height)
+
+        public void FillRectangle(float x, float y, float width, float height)
         {
             if (!PaintCheck())
                 return;
 
-            RawRectangleF rect = new RawRectangleF((float)x, (float)y, (float)(x + width), (float)(y + height));
+            RawRectangleF rect = new RawRectangleF(x, y, (x + width), (y + height));
             m_RenderTarget.FillRectangle(rect, m_CurrentBrush);
         }
 
-        public void FillRectangle(Rectangle rect)
+        public void FillRectangle(Rectanglef rect)
         {
             FillRectangle(rect.X, rect.Y, rect.Width, rect.Height);
         }
 
         //Rounded rectangle
-        public void DrawRoundedRectangle(int x, int y, int width, int height, int radiusX, int radiusY)
+        public void DrawRoundedRectangle(float x, float y, float width, float height, float radiusX, float radiusY)
         {
             DrawRoundedRectangle(x, y, width, height, radiusX, radiusY, 1);
         }
 
-        public void DrawRoundedRectangle(Rectangle rect, Vector2 radius)
+        public void DrawRoundedRectangle(Rectanglef rect, Vector2f radius)
         {
             DrawRoundedRectangle(rect.X, rect.Y, rect.Width, rect.Height, radius.X, radius.Y);
         }
 
-        public void DrawRoundedRectangle(int x, int y, int width, int height, int radiusX, int radiusY, int strokeWidth)
+        public void DrawRoundedRectangle(float x, float y, float width, float height, float radiusX, float radiusY, float strokeWidth)
         {
             if (!PaintCheck())
                 return;
 
-            RawRectangleF rect = new RawRectangleF((float)x, (float)y, (float)(x + width), (float)(y + height));
+            RawRectangleF rect = new RawRectangleF(x, y, (x + width), (y + height));
 
             RoundedRectangle roundedRect = new RoundedRectangle();
             roundedRect.Rect = rect;
-            roundedRect.RadiusX = (float)radiusX;
-            roundedRect.RadiusY = (float)radiusY;
+            roundedRect.RadiusX = radiusX;
+            roundedRect.RadiusY = radiusY;
 
             m_RenderTarget.DrawRoundedRectangle(roundedRect, m_CurrentBrush, strokeWidth);
         }
 
-        public void DrawRoundedRectangle(Rectangle rect, Vector2 radius, int strokeWidth)
+        public void DrawRoundedRectangle(Rectanglef rect, Vector2 radius, int strokeWidth)
         {
             DrawRoundedRectangle(rect.X, rect.Y, rect.Width, rect.Height, radius.X, radius.Y, strokeWidth);
         }
 
-        public void FillRoundedRectangle(int x, int y, int width, int height, int radiusX, int radiusY)
+
+        public void FillRoundedRectangle(float x, float y, float width, float height, float radiusX, float radiusY)
         {
             if (!PaintCheck())
                 return;
 
-            RawRectangleF rect = new RawRectangleF((float)x, (float)y, (float)(x + width), (float)(y + height));
+            RawRectangleF rect = new RawRectangleF(x, y, (x + width), (y + height));
 
             RoundedRectangle roundedRect = new RoundedRectangle();
             roundedRect.Rect = rect;
-            roundedRect.RadiusX = (float)radiusX;
-            roundedRect.RadiusY = (float)radiusY;
+            roundedRect.RadiusX = radiusX;
+            roundedRect.RadiusY = radiusY;
 
             m_RenderTarget.FillRoundedRectangle(ref roundedRect, m_CurrentBrush);
         }
 
-        public void FillRoundedRectangle(Rectangle rect, Vector2 radius)
+        public void FillRoundedRectangle(Rectanglef rect, Vector2f radius)
         {
             FillRoundedRectangle(rect.X, rect.Y, rect.Width, rect.Height, radius.X, radius.Y);
         }
 
         //Ellipse
-        public void DrawEllipse(int x, int y, int width, int height)
+        public void DrawEllipse(float x, float y, float width, float height)
         {
             //Not using default parameters on purpose.
             DrawEllipse(x, y, width, height, 1);
         }
 
-        public void DrawEllipse(Rectangle rect)
+        public void DrawEllipse(Rectanglef rect)
         {
             DrawEllipse(rect.X, rect.Y, rect.Width, rect.Height);
         }
 
-        public void DrawEllipse(int x, int y, int width, int height, int strokeWidth)
+        public void DrawEllipse(float x, float y, float width, float height, float strokeWidth)
         {
             if (!PaintCheck())
                 return;
 
-            Ellipse ellipse = new Ellipse(new RawVector2((float)x, (float)y), (float)width, (float)height);
-            m_RenderTarget.DrawEllipse(ellipse, m_CurrentBrush, (float)strokeWidth);
+            Ellipse ellipse = new Ellipse(new RawVector2(x, y), width, height);
+            m_RenderTarget.DrawEllipse(ellipse, m_CurrentBrush, strokeWidth);
         }
 
-        public void DrawEllipse(Rectangle rect, int strokeWidth)
+        public void DrawEllipse(Rectanglef rect, float strokeWidth)
         {
             DrawEllipse(rect.X, rect.Y, rect.Width, rect.Height, strokeWidth);
         }
 
-        public void FillEllipse(int x, int y, int width, int height)
+
+        public void FillEllipse(float x, float y, float width, float height)
         {
             if (!PaintCheck())
                 return;
 
-            Ellipse ellipse = new Ellipse(new RawVector2((float)x, (float)y), (float)width, (float)height);
+            Ellipse ellipse = new Ellipse(new RawVector2(x, y), width, height);
             m_RenderTarget.FillEllipse(ellipse, m_CurrentBrush);
         }
 
-        public void FillEllipse(Rectangle rect)
+        public void FillEllipse(Rectanglef rect)
         {
             FillEllipse(rect.X, rect.Y, rect.Width, rect.Height);
         }
 
         //Bitmaps
-        public void DrawBitmap(Bitmap bitmap, int x, int y)
+        public void DrawBitmap(Bitmap bitmap, float x, float y)
         {
             DrawBitmap(bitmap, x, y, 0, 0, 0, 0);
         }
 
-        public void DrawBitmap(Bitmap bitmap, Vector2 position)
+        public void DrawBitmap(Bitmap bitmap, Vector2f position)
         {
             DrawBitmap(bitmap, position.X, position.Y);
-
         }
 
-        public void DrawBitmap(Bitmap bitmap, int x, int y, int sourceX, int sourceY, int sourceWidth, int sourceHeight)
+        public void DrawBitmap(Bitmap bitmap, float x, float y, float sourceX, float sourceY, float sourceWidth, float sourceHeight)
         {
             if (!PaintCheck())
                 return;
 
             SharpDX.Direct2D1.Bitmap D2DBitmap = bitmap.D2DBitmap;
 
-            if (sourceWidth == 0)  sourceWidth = (int)D2DBitmap.Size.Width;
-            if (sourceHeight == 0) sourceHeight = (int)D2DBitmap.Size.Height;
+            if (sourceWidth == 0)  sourceWidth = D2DBitmap.Size.Width;
+            if (sourceHeight == 0) sourceHeight = D2DBitmap.Size.Height;
 
-            RawRectangleF sourceRect = new RawRectangleF((float)sourceX, (float)sourceY, (float)(sourceX + sourceWidth), (float)(sourceY + sourceHeight));
+            RawRectangleF sourceRect = new RawRectangleF(sourceX, sourceY, (sourceX + sourceWidth), (sourceY + sourceHeight));
 
             m_RenderTarget.Transform = SharpDX.Matrix3x2.Translation(x, y);
             m_RenderTarget.DrawBitmap(D2DBitmap, 1.0f, SharpDX.Direct2D1.BitmapInterpolationMode.NearestNeighbor, sourceRect);
             m_RenderTarget.Transform = SharpDX.Matrix3x2.Translation(0, 0);
         }
 
-        public void DrawBitmap(Bitmap bitmap, int x, int y, Rectangle sourceRect)
+        public void DrawBitmap(Bitmap bitmap, int x, int y, Rectanglef sourceRect)
         {
             DrawBitmap(bitmap, x, y, sourceRect.X, sourceRect.Y, sourceRect.Width, sourceRect.Height);
         }
 
-        public void DrawBitmap(Bitmap bitmap, Vector2 position, Rectangle sourceRect)
+        public void DrawBitmap(Bitmap bitmap, Vector2 position, Rectanglef sourceRect)
         {
             DrawBitmap(bitmap, position.X, position.Y, sourceRect.X, sourceRect.Y, sourceRect.Width, sourceRect.Height);
         }
 
         //Text
-        public void DrawString(string text, int x, int y, int width, int height)
+        public void DrawString(string text, float x, float y, float width, float height)
         {
             DrawString(null, text, x, y, width, height);
         }
 
-        public void DrawString(string text, Rectangle rect)
+        public void DrawString(string text, Rectanglef rect)
         {
             DrawString(text, rect.X, rect.Y, rect.Width, rect.Height);
         }
 
-        public void DrawString(Font font, string text, int x, int y, int width, int height)
+        public void DrawString(Font font, string text, float x, float y, float width, float height)
         {
             if (!PaintCheck())
                 return;
@@ -889,11 +892,11 @@ namespace GameEngine
             if (font == null)
                 font = m_DefaultFont;
 
-            RawRectangleF rect = new RawRectangleF((float)x, (float)y, (float)(x + width), (float)(y + height));
+            RawRectangleF rect = new RawRectangleF(x, y, (x + width), (y + height));
             m_RenderTarget.DrawText(text, font.TextFormat, rect, m_CurrentBrush);
         }
 
-        public void DrawString(Font font, string text, Rectangle rect)
+        public void DrawString(Font font, string text, Rectanglef rect)
         {
             DrawString(font, text, rect.X, rect.Y, rect.Width, rect.Height);
         }
@@ -934,26 +937,6 @@ namespace GameEngine
             return m_InputManager.GetMousePosition();
         }
 
-        public void Log(string message)
-        {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine("DEBUG: " + message);
-        }
-
-        public void LogWarning(string message)
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("WARNING: " + message);
-            Console.ForegroundColor = ConsoleColor.White;
-        }
-
-        public void LogError(string message)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("ERROR: " + message);
-            Console.ForegroundColor = ConsoleColor.White;
-        }
-
         //Audio methods
         public void PlayAudio(Audio audio)
         {
@@ -980,6 +963,27 @@ namespace GameEngine
             }
 
             m_AudioManager.SetVolume(volume);
+        }
+
+        //Logging
+        public void Log(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("DEBUG: " + message);
+        }
+
+        public void LogWarning(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("WARNING: " + message);
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+        public void LogError(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("ERROR: " + message);
+            Console.ForegroundColor = ConsoleColor.White;
         }
 
         //Camera methods TODO
@@ -1363,7 +1367,7 @@ namespace GameEngine
 
         //Required
         private string m_Text = "Button";
-        private Rectangle m_Rectangle = new Rectangle(0, 0, 100, 25);
+        private Rectanglef m_Rectangle = new Rectanglef(0, 0, 100, 25);
         private ButtonCallback m_Callback;
 
         //Extra settings
@@ -1385,20 +1389,20 @@ namespace GameEngine
         //Functions
         public Button(ButtonCallback callback) : base()
         {
-            Initialize(callback, "Button", new Rectangle(0, 0, 100, 25));
+            Initialize(callback, "Button", new Rectanglef(0, 0, 100, 25));
         }
 
         public Button(ButtonCallback callback, string text, int x, int y, int width, int height) : base()
         {
-            Initialize(callback, text, new Rectangle(x, y, width, height));
+            Initialize(callback, text, new Rectanglef(x, y, width, height));
         }
 
-        public Button(ButtonCallback callback, string text, Rectangle rectangle) : base()
+        public Button(ButtonCallback callback, string text, Rectanglef rectangle) : base()
         {
             Initialize(callback, text, rectangle);
         }
 
-        private void Initialize(ButtonCallback callback, string text, Rectangle rectangle)
+        private void Initialize(ButtonCallback callback, string text, Rectanglef rectangle)
         {
             m_Text = text;
             m_Rectangle = rectangle;
@@ -1526,20 +1530,20 @@ namespace GameEngine
 
         public void SetPosition(int x, int y)
         {
-            m_Rectangle = new Rectangle(x, y, m_Rectangle.Width, m_Rectangle.Height);
+            m_Rectangle = new Rectanglef(x, y, m_Rectangle.Width, m_Rectangle.Height);
         }
 
         public void SetSize(int width, int height)
         {
-            m_Rectangle = new Rectangle(m_Rectangle.X, m_Rectangle.Y, width, height);
+            m_Rectangle = new Rectanglef(m_Rectangle.X, m_Rectangle.Y, width, height);
         }
 
         public void SetRectangle(int x, int y, int width, int height)
         {
-            m_Rectangle = new Rectangle(x, y, width, height);
+            m_Rectangle = new Rectanglef(x, y, width, height);
         }
 
-        public void SetRectangle(Rectangle rectangle)
+        public void SetRectangle(Rectanglef rectangle)
         {
             m_Rectangle = rectangle;
         }

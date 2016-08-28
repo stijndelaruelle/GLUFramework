@@ -51,9 +51,9 @@ namespace GameEngine
         }
 
         //PhysicsObject
-        public Rectangle GetAABB()
+        public Rectanglef GetAABB()
         {
-            return new Rectangle((int)m_Position.X, (int)m_Position.Y, m_Size.X, m_Size.Y);
+            return new Rectanglef((int)m_Position.X, (int)m_Position.Y, m_Size.X, m_Size.Y);
         }
 
         public void OnCollisionEnter(PhysicsObject otherObj)

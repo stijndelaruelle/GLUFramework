@@ -8,7 +8,7 @@ namespace GameEngine
 {
     public interface PhysicsObject
     {
-        Rectangle GetAABB();
+        Rectanglef GetAABB();
         void OnCollisionEnter(PhysicsObject otherObj);
     }
 
@@ -35,8 +35,8 @@ namespace GameEngine
                 {
                     if (i != j)
                     {
-                        Rectangle AABB = m_PhysicsObjects[i].GetAABB();
-                        Rectangle otherAABB = m_PhysicsObjects[j].GetAABB();
+                        Rectanglef AABB = m_PhysicsObjects[i].GetAABB();
+                        Rectanglef otherAABB = m_PhysicsObjects[j].GetAABB();
 
                         if (!(AABB.X > otherAABB.X + otherAABB.Width ||
                               AABB.X + AABB.Width < otherAABB.X ||

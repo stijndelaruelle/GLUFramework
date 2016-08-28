@@ -95,7 +95,7 @@ namespace GameEngine
             GAME_ENGINE.DrawBitmap(m_bmpLevel, 0, 0);
 
             //draw character
-            Rectangle frame = new Rectangle();
+            Rectanglef frame = new Rectanglef();
             if (m_iPlayerDir == -1) frame.Y = 0; else frame.Y = m_bmpChar.GetHeight() / 2; //32
             frame.Height = m_bmpChar.GetHeight() / 2; //32
             frame.X = m_bmpChar.GetWidth() / 7 * m_iPlayerFrame; //32

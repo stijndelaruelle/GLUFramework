@@ -19,7 +19,7 @@ namespace GameEngine
 
         private Font m_Font;
 
-        private List<Rectangle> m_PositionList;
+        private List<Rectanglef> m_PositionList;
 
         public override void GameInitialize()
         {
@@ -39,7 +39,7 @@ namespace GameEngine
             m_Font.SetHorizontalAlignment(Font.Alignment.Center);
             m_Font.SetVerticalAlignment(Font.Alignment.Center);
 
-            m_PositionList = new List<Rectangle>();
+            m_PositionList = new List<Rectanglef>();
         }
 
         public override void GameEnd()
@@ -49,13 +49,13 @@ namespace GameEngine
 
         public override void Update()
         {
-            m_PositionList.Add(new Rectangle(m_Position.X, m_Position.Y, m_Direction.X, m_Direction.Y));
+            m_PositionList.Add(new Rectanglef(m_Position.X, m_Position.Y, m_Direction.X, m_Direction.Y));
 
             m_Position.X += m_Direction.X * 10;
             m_Position.Y += m_Direction.Y * 10;
 
             //Find location
-            Rectangle vecToFind = new Rectangle(m_Position.X, m_Position.Y, m_Direction.X, m_Direction.Y);
+            Rectanglef vecToFind = new Rectanglef(m_Position.X, m_Position.Y, m_Direction.X, m_Direction.Y);
             if (m_PositionList.Contains(vecToFind))
             {
                 Console.WriteLine("DUPLICATE POSITION X=" + vecToFind.X + " Y=" + vecToFind.Y);
@@ -115,7 +115,7 @@ namespace GameEngine
             GAME_ENGINE.FillRectangle(m_Position.X, m_Position.Y, m_Size.X, m_Size.Y);
 
             GAME_ENGINE.SetColor(new Color(20, 20, 20));
-            GAME_ENGINE.DrawString(m_Font, "Alleen audio", new Rectangle(m_Position.X, m_Position.Y, m_Size.X, m_Size.Y));
+            GAME_ENGINE.DrawString(m_Font, "Alleen audio", new Rectanglef(m_Position.X, m_Position.Y, m_Size.X, m_Size.Y));
         }
     }
 }
