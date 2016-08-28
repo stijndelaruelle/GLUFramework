@@ -423,6 +423,7 @@ namespace GameEngine
         private int m_Width = 800;
         private int m_Height = 600;
         private SharpDX.Color m_ClearColor = new SharpDX.Color(255, 255, 255);
+        private float m_Angle = 0.0f;
 
         //Default properties
         private SolidColorBrush m_CurrentBrush;
@@ -667,6 +668,33 @@ namespace GameEngine
             SetBackgroundColor(color.R, color.G, color.B);
         }
 
+        //Roation
+        public void Rotate(float angle)
+        {
+            //Convert degrees to radians
+            float radAngle = (float)(angle * (Math.PI / 180.0f)); //1 degree = PI / 180.0f
+            m_Angle += radAngle;
+        }
+
+        public void ResetRotation()
+        {
+            m_Angle = 0.0f;
+        }
+
+        private void SetTransformMatrix(Vector2f position, float angle, Vector2f rotateCenter)
+        {
+            //Adjust the transform matrix
+            SharpDX.Matrix3x2 matRotate = SharpDX.Matrix3x2.Rotation(angle, new SharpDX.Vector2(rotateCenter.X, rotateCenter.Y));
+            SharpDX.Matrix3x2 matTranslate = SharpDX.Matrix3x2.Translation(position.X, position.Y);
+
+            m_RenderTarget.Transform = matRotate * matTranslate;
+        }
+
+        private void ResetTransformMatrix()
+        {
+            m_RenderTarget.Transform = SharpDX.Matrix3x2.Identity;
+        }
+
         //Draw methods
         public void SetColor(int r, int g, int b)
         {
@@ -690,10 +718,17 @@ namespace GameEngine
             if (!PaintCheck())
                 return;
 
-            RawVector2 p1 = new RawVector2(startPointX, startPointY);
-            RawVector2 p2 = new RawVector2(endPointX, endPointY);
+            //Adjust the transform matrix
+            float width = endPointX - startPointX;
+            float height = endPointY - startPointY;
+            SetTransformMatrix(new Vector2f(startPointX, startPointY), m_Angle, new Vector2f(width * 0.5f, height * 0.5f));
+
+            RawVector2 p1 = new RawVector2(0.0f, 0.0f);
+            RawVector2 p2 = new RawVector2(width, height);
 
             m_RenderTarget.DrawLine(p1, p2, m_CurrentBrush);
+
+            ResetTransformMatrix();
         }
 
         public void DrawLine(Vector2f startPoint, Vector2f endPoint)
@@ -718,8 +753,14 @@ namespace GameEngine
             if (!PaintCheck())
                 return;
 
-            RawRectangleF rect = new RawRectangleF(x, y, (x + width), (y + height));
+            //Adjust the transform matrix
+            SetTransformMatrix(new Vector2f(x, y), m_Angle, new Vector2f(width * 0.5f, height * 0.5f));
+
+            RawRectangleF rect = new RawRectangleF(0.0f, 0.0f, width, height);
             m_RenderTarget.DrawRectangle(rect, m_CurrentBrush, strokeWidth);
+
+            //Reset the transform matrix
+            ResetTransformMatrix();
         }
 
         public void DrawRectangle(Rectanglef rect, float strokeWidth)
@@ -733,8 +774,15 @@ namespace GameEngine
             if (!PaintCheck())
                 return;
 
-            RawRectangleF rect = new RawRectangleF(x, y, (x + width), (y + height));
+            //Adjust the transform matrix
+            SetTransformMatrix(new Vector2f(x, y), m_Angle, new Vector2f(width * 0.5f, height * 0.5f));
+
+            //Actually render
+            RawRectangleF rect = new RawRectangleF(0.0f, 0.0f, width, height);
             m_RenderTarget.FillRectangle(rect, m_CurrentBrush);
+
+            //Reset the transform matrix
+            ResetTransformMatrix();
         }
 
         public void FillRectangle(Rectanglef rect)
@@ -758,7 +806,10 @@ namespace GameEngine
             if (!PaintCheck())
                 return;
 
-            RawRectangleF rect = new RawRectangleF(x, y, (x + width), (y + height));
+            //Adjust the transform matrix
+            SetTransformMatrix(new Vector2f(x, y), m_Angle, new Vector2f(width * 0.5f, height * 0.5f));
+
+            RawRectangleF rect = new RawRectangleF(0.0f, 0.0f, width, height);
 
             RoundedRectangle roundedRect = new RoundedRectangle();
             roundedRect.Rect = rect;
@@ -766,6 +817,9 @@ namespace GameEngine
             roundedRect.RadiusY = radiusY;
 
             m_RenderTarget.DrawRoundedRectangle(roundedRect, m_CurrentBrush, strokeWidth);
+
+            //Reset the transform matrix
+            ResetTransformMatrix();
         }
 
         public void DrawRoundedRectangle(Rectanglef rect, Vector2 radius, int strokeWidth)
@@ -779,7 +833,10 @@ namespace GameEngine
             if (!PaintCheck())
                 return;
 
-            RawRectangleF rect = new RawRectangleF(x, y, (x + width), (y + height));
+            //Adjust the transform matrix
+            SetTransformMatrix(new Vector2f(x, y), m_Angle, new Vector2f(width * 0.5f, height * 0.5f));
+
+            RawRectangleF rect = new RawRectangleF(0.0f, 0.0f, width, height);
 
             RoundedRectangle roundedRect = new RoundedRectangle();
             roundedRect.Rect = rect;
@@ -787,6 +844,9 @@ namespace GameEngine
             roundedRect.RadiusY = radiusY;
 
             m_RenderTarget.FillRoundedRectangle(ref roundedRect, m_CurrentBrush);
+
+            //Reset the transform matrix
+            ResetTransformMatrix();
         }
 
         public void FillRoundedRectangle(Rectanglef rect, Vector2f radius)
@@ -811,8 +871,14 @@ namespace GameEngine
             if (!PaintCheck())
                 return;
 
-            Ellipse ellipse = new Ellipse(new RawVector2(x, y), width, height);
+            //Adjust the transform matrix
+            SetTransformMatrix(new Vector2f(x, y), m_Angle, new Vector2f(0.0f, 0.0f));
+
+            Ellipse ellipse = new Ellipse(new RawVector2(0.0f, 0.0f), width, height);
             m_RenderTarget.DrawEllipse(ellipse, m_CurrentBrush, strokeWidth);
+
+            //Reset the transform matrix
+            ResetTransformMatrix();
         }
 
         public void DrawEllipse(Rectanglef rect, float strokeWidth)
@@ -826,8 +892,15 @@ namespace GameEngine
             if (!PaintCheck())
                 return;
 
-            Ellipse ellipse = new Ellipse(new RawVector2(x, y), width, height);
+
+            //Adjust the transform matrix
+            SetTransformMatrix(new Vector2f(x, y), m_Angle, new Vector2f(0.0f, 0.0f));
+
+            Ellipse ellipse = new Ellipse(new RawVector2(0.0f, 0.0f), width, height);
             m_RenderTarget.FillEllipse(ellipse, m_CurrentBrush);
+
+            //Reset the transform matrix
+            ResetTransformMatrix();
         }
 
         public void FillEllipse(Rectanglef rect)
@@ -856,11 +929,14 @@ namespace GameEngine
             if (sourceWidth == 0)  sourceWidth = D2DBitmap.Size.Width;
             if (sourceHeight == 0) sourceHeight = D2DBitmap.Size.Height;
 
-            RawRectangleF sourceRect = new RawRectangleF(sourceX, sourceY, (sourceX + sourceWidth), (sourceY + sourceHeight));
+            //Adjust the transform matrix
+            SetTransformMatrix(new Vector2f(x, y), m_Angle, new Vector2f(sourceWidth * 0.5f, sourceHeight * 0.5f));
 
-            m_RenderTarget.Transform = SharpDX.Matrix3x2.Translation(x, y);
+            RawRectangleF sourceRect = new RawRectangleF(sourceX, sourceY, (sourceX + sourceWidth), (sourceY + sourceHeight));
             m_RenderTarget.DrawBitmap(D2DBitmap, 1.0f, SharpDX.Direct2D1.BitmapInterpolationMode.NearestNeighbor, sourceRect);
-            m_RenderTarget.Transform = SharpDX.Matrix3x2.Translation(0, 0);
+
+            //Reset the transform matrix
+            ResetTransformMatrix();
         }
 
         public void DrawBitmap(Bitmap bitmap, int x, int y, Rectanglef sourceRect)
@@ -892,8 +968,14 @@ namespace GameEngine
             if (font == null)
                 font = m_DefaultFont;
 
-            RawRectangleF rect = new RawRectangleF(x, y, (x + width), (y + height));
+            //Adjust the transform matrix
+            SetTransformMatrix(new Vector2f(x, y), m_Angle, new Vector2f(width * 0.5f, height * 0.5f));
+
+            RawRectangleF rect = new RawRectangleF(0.0f, 0.0f, width, height);
             m_RenderTarget.DrawText(text, font.TextFormat, rect, m_CurrentBrush);
+
+            //Reset the transform matrix
+            ResetTransformMatrix();
         }
 
         public void DrawString(Font font, string text, Rectanglef rect)
@@ -1292,20 +1374,20 @@ namespace GameEngine
             m_D2DBitmap = SharpDX.Direct2D1.Bitmap1.FromWicBitmap(renderTarget, converter);
         }
 
-        private void SetTransparancyColor(Color color)
-        {
+        //private void SetTransparancyColor(Color color)
+        //{
             //To be made, for now use PNG
             //new SharpDX.Direct2D1.Effects.ColorManagement()
+        //}
+
+        public float GetWidth()
+        {
+            return m_D2DBitmap.Size.Width;
         }
 
-        public int GetWidth()
+        public float GetHeight()
         {
-            return (int)m_D2DBitmap.Size.Width;
-        }
-
-        public int GetHeight()
-        {
-            return (int)m_D2DBitmap.Size.Height;
+            return m_D2DBitmap.Size.Height;
         }
     }
 
@@ -1383,7 +1465,7 @@ namespace GameEngine
         private Color m_ClickBackgroundColor = new Color(200, 200, 200);
         private Color m_ClickBorderColor = Color.Black;
 
-        private Vector2 m_CornerRadius = new Vector2(0, 0);
+        private Vector2f m_CornerRadius = new Vector2f(0.0f, 0.0f);
 
 
         //Functions
@@ -1422,7 +1504,7 @@ namespace GameEngine
             if (m_Bitmap != null)
                 m_Bitmap.Dispose();
 
-            GAME_ENGINE.UnsubscribeGameObject(this);
+            base.GameEnd();
         }
 
         public override void Update()
@@ -1450,6 +1532,8 @@ namespace GameEngine
 
         public override void Paint()
         {
+            GAME_ENGINE.ResetRotation();
+
             Color fgColor = m_ForegroundColor;
             Color bgColor = m_BackgroundColor;
             Color borderColor = m_BorderColor;
@@ -1509,7 +1593,7 @@ namespace GameEngine
 
         private void DrawBitmapButton()
         {
-            int yOffset = 0;
+            float yOffset = 0;
             if (m_IsHovering) yOffset += m_Rectangle.Height;
             if (m_IsClicked)  yOffset += m_Rectangle.Height;
 
@@ -1536,11 +1620,6 @@ namespace GameEngine
         public void SetSize(int width, int height)
         {
             m_Rectangle = new Rectanglef(m_Rectangle.X, m_Rectangle.Y, width, height);
-        }
-
-        public void SetRectangle(int x, int y, int width, int height)
-        {
-            m_Rectangle = new Rectanglef(x, y, width, height);
         }
 
         public void SetRectangle(Rectanglef rectangle)
@@ -1595,11 +1674,6 @@ namespace GameEngine
         }
 
 
-        public void SetBitmap(string filepath)
-        {
-            m_Bitmap = new Bitmap(filepath);
-        }
-
         public void SetBitmap(Bitmap bitmap)
         {
             m_Bitmap = bitmap;
@@ -1610,7 +1684,7 @@ namespace GameEngine
             m_Font = font;
         }
 
-        public void SetCornerRadius(Vector2 radius)
+        public void SetCornerRadius(Vector2f radius)
         {
             m_CornerRadius = radius;
         }

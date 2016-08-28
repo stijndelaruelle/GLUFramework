@@ -92,6 +92,7 @@
     <Compile Include="Engine\GameEngine.cs" />
     <Compile Include="Engine\Main.cs" />
     <Compile Include="Game\Demos\Ball.cs" />
+    <Compile Include="Game\Demos\ButtonUsage.cs" />
     <Compile Include="Game\Demos\Pong\Ball.cs" />
     <Compile Include="Game\Demos\Pong\Paddle.cs" />
     <Compile Include="Game\Demos\Pong\PhysicsWorld.cs" />

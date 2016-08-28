@@ -16,7 +16,8 @@ namespace GameEngine
             if (instance == null)
                 return;
 
-            new XYZ(); //XYZ implements AbstractGame and subscribes himself to the game engine
+            //new XYZ(); //XYZ implements AbstractGame and subscribes himself to the game engine
+            new ButtonUsage();
 
             instance.Run();
 
