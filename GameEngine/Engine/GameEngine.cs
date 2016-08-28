@@ -473,6 +473,9 @@ namespace GameEngine
             m_RenderForm.ClientSize = new Size(m_Width, m_Height);
             m_RenderForm.AutoSizeMode = AutoSizeMode.GrowAndShrink;
 
+            //Disables rescaling
+            m_RenderForm.MaximizeBox = false;
+
             InitializeDeviceResources();
 
             //Initialize the external managers
