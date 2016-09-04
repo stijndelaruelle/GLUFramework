@@ -425,6 +425,10 @@ namespace GameEngine
         private SharpDX.Color m_ClearColor = new SharpDX.Color(255, 255, 255);
         private float m_Angle = 0.0f;
 
+        //Camera properties
+        private Vector2f m_CameraPosition;
+        private float m_CameraAngle;
+
         //Default properties
         private SolidColorBrush m_CurrentBrush;
         private Font m_DefaultFont; //So students can quickly get text on the screen without messing around with fonts.
@@ -1774,11 +1778,17 @@ namespace GameEngine
             long availableSamples = m_Data.Length - m_CurrentPosition;
 
             //Looping
-            if (availableSamples <= 0 && m_IsLooping == true)
+            if (availableSamples <= 0)
             {
                 m_CurrentPosition = 0;
-                availableSamples = m_Data.Length - m_CurrentPosition;
+                availableSamples = 0;
+
+                if (m_IsLooping == true)
+                {
+                    availableSamples = m_Data.Length - m_CurrentPosition;
+                }
             }
+
 
             long samplesToCopy = Math.Min(availableSamples, count);
 

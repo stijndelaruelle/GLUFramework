@@ -11,6 +11,8 @@ namespace GameEngine
         private Button m_Button;
         private Bitmap m_Bitmap;
         private Font m_Font;
+        private Audio m_ButtonClick;
+
         public override void GameStart()
         {
             //Everything that has to happen when the game starts happens here.
@@ -21,6 +23,8 @@ namespace GameEngine
             m_Font = new Font("scorefont.TTF", 16);
             m_Font.SetVerticalAlignment(Font.Alignment.Center);
             m_Font.SetHorizontalAlignment(Font.Alignment.Center);
+
+            m_ButtonClick = new Audio("ping.mp3");
         }
 
         public override void GameEnd()
@@ -56,6 +60,7 @@ namespace GameEngine
         private void CallBack()
         {
             GAME_ENGINE.Log("Clicked!");
+            GAME_ENGINE.PlayAudio(m_ButtonClick);
         }
     }
 }
