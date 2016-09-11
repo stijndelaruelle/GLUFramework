@@ -640,7 +640,11 @@ namespace GameEngine
 
         public void SetIcon(string iconPath)
         {
-            m_IconPath = iconPath;
+            #if DEBUG
+                m_IconPath = ("../../Assets/" + iconPath);
+            #else
+                m_IconPath = "./Assets/" + iconPath;
+            #endif
         }
 
         public void SetWidth(int width)
@@ -1354,7 +1358,11 @@ namespace GameEngine
 
         public Bitmap(string filePath)
         {
-            LoadBitmap("../../Assets/" + filePath);
+            #if DEBUG
+                LoadBitmap("../../Assets/" + filePath);
+            #else
+                LoadBitmap("./Assets/" + filePath);
+            #endif
         }
 
         public void Dispose()

@@ -12,8 +12,8 @@ namespace GameEngine
         public override void GameInitialize()
         {
             // Set the required values
-            GAME_ENGINE.SetTitle("Game Engine v1.0");
-            GAME_ENGINE.SetIcon("../../Assets/icon.ico");
+            GAME_ENGINE.SetTitle("Canvas v1.0");
+            GAME_ENGINE.SetIcon("icon.ico");
 
             // Set the optional values
             GAME_ENGINE.SetWidth(640);
