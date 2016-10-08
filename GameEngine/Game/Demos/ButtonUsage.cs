@@ -13,6 +13,8 @@ namespace GameEngine
         private Font m_Font;
         private Audio m_ButtonClick;
 
+        private float m_Timer; 
+
         public override void GameStart()
         {
             //Everything that has to happen when the game starts happens here.
@@ -38,12 +40,16 @@ namespace GameEngine
 
         public override void Update()
         {
-            //Update everything here.
-            //F.e. get input, move objects, etc...
+            if (m_Button.IsActive() == false)
+            {
+                m_Timer += GAME_ENGINE.GetDeltaTime();
 
-            //For example:
-            //float deltaTime = GAME_ENGINE.GetDeltaTime();
-            //bool isDown = GAME_ENGINE.GetKeyDown(Key.Right);
+                if (m_Timer > 1.0f)
+                {
+                    m_Button.SetActive(true);
+                    m_Timer = 0.0f;
+                }
+            }
         }
 
         public override void Paint()
@@ -61,6 +67,8 @@ namespace GameEngine
         {
             GAME_ENGINE.Log("Clicked!");
             GAME_ENGINE.PlayAudio(m_ButtonClick);
+
+            m_Button.SetActive(false);
         }
     }
 }

@@ -401,6 +401,8 @@ namespace GameEngine
 
         //Subscribed game objects
         private List<GameObject> m_GameObjects;
+        private List<GameObject> m_SubscribingGameObjects;   //Objects that want to subscribe this frame
+        private List<GameObject> m_UnsubscribingGameObjects; //Objects that want to unsubscribe this frame
 
         //DirectX
         private RenderForm m_RenderForm;
@@ -448,6 +450,8 @@ namespace GameEngine
         public GameEngine()
         {
             m_GameObjects = new List<GameObject>();
+            m_SubscribingGameObjects = new List<GameObject>();
+            m_UnsubscribingGameObjects = new List<GameObject>();
         }
 
         public void Dispose()
@@ -457,6 +461,8 @@ namespace GameEngine
                 m_GameObjects[i].GameEnd();
 
             m_GameObjects.Clear();
+            m_SubscribingGameObjects.Clear();
+            m_UnsubscribingGameObjects.Clear();
 
             m_RenderForm.Dispose();
 
@@ -543,6 +549,9 @@ namespace GameEngine
 
         public void Run()
         {
+            //Make sure the root GameObject is in the list
+            UpdateGameObjectList();
+
             if (m_GameObjects.Count == 0)
             {
                 LogError("We are trying to run an undefined game!");
@@ -556,8 +565,8 @@ namespace GameEngine
             //Initialize the engine (window)
             CreateWindow();
 
-            for (int i = m_GameObjects.Count - 1; i >= 0; --i)
-                m_GameObjects[i].GameStart();
+            foreach (GameObject go in m_GameObjects)
+                go.GameStart();
 
             //Start the core game / renderloop
             m_Stopwatch = new Stopwatch();
@@ -586,6 +595,9 @@ namespace GameEngine
 
                 m_SwapChain.Present(1, PresentFlags.None); //1 for VSync
 
+                //Add & remove GameObjects from the list
+                UpdateGameObjectList();
+
                 m_LastDeltaTime = m_Stopwatch.ElapsedMilliseconds / 1000.0f;
                 m_Stopwatch.Restart();
             });
@@ -601,14 +613,26 @@ namespace GameEngine
             return m_CanIPaint;
         }
 
+        public void UpdateGameObjectList()
+        {
+            foreach (GameObject go in m_SubscribingGameObjects)
+                m_GameObjects.Add(go);
+
+            foreach (GameObject go in m_UnsubscribingGameObjects)
+                m_GameObjects.Remove(go);
+
+            m_SubscribingGameObjects.Clear();
+            m_UnsubscribingGameObjects.Clear();
+        }
+
         public void SubscribeGameObject(GameObject go)
         {
-            m_GameObjects.Add(go);
+            m_SubscribingGameObjects.Add(go);
         }
 
         public void UnsubscribeGameObject(GameObject go)
         {
-            m_GameObjects.Remove(go);
+            m_UnsubscribingGameObjects.Add(go);
         }
 
         //Window mutators & accessors (we are not using C# properties to make everything more clear.)
@@ -1332,6 +1356,8 @@ namespace GameEngine
             get { return m_GameEngine; }
         }
 
+        private bool m_IsActive = true;
+
         public GameObject()
         {
             m_GameEngine = GameEngine.GetInstance();
@@ -1346,6 +1372,25 @@ namespace GameEngine
         }
         public virtual void Update() { }
         public virtual void Paint() { }
+
+        //Mutators
+        public void SetActive(bool isActive)
+        {
+            if (m_IsActive == isActive)
+                return;
+
+            //Totally unsubscribe this object during inactivity in order to save CPU cycles.
+            if (isActive == true) { m_GameEngine.SubscribeGameObject(this); }
+            else                  { m_GameEngine.UnsubscribeGameObject(this); }
+
+            m_IsActive = isActive;
+        }
+
+        //Accessors
+        public bool IsActive()
+        {
+            return m_IsActive;
+        }
     }
 
     public class Bitmap : IDisposable
@@ -1524,6 +1569,9 @@ namespace GameEngine
 
         public override void Update()
         {
+            if (!base.IsActive())
+                return;
+
             //Check if the mouse position is colliding with our button
             Vector2 mousePosition = GAME_ENGINE.GetMousePosition();
 
@@ -1547,6 +1595,9 @@ namespace GameEngine
 
         public override void Paint()
         {
+            if (!base.IsActive())
+                return;
+
             GAME_ENGINE.ResetRotation();
 
             Color fgColor = m_ForegroundColor;
@@ -1616,7 +1667,7 @@ namespace GameEngine
         }
 
 
-        //Mutators & Accessors
+        //Mutators
         public void SetCallback(ButtonCallback callback)
         {
             m_Callback = callback;
