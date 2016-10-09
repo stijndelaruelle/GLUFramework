@@ -1363,6 +1363,7 @@ namespace GameEngine
             m_GameEngine = GameEngine.GetInstance();
             m_GameEngine.SubscribeGameObject(this);
         }
+        public virtual void Dispose() { }
 
         public virtual void GameInitialize() { }
         public virtual void GameStart() { }
@@ -1413,7 +1414,11 @@ namespace GameEngine
         public void Dispose()
         {
             //This is the destructor
-            m_D2DBitmap.Dispose();
+            if (m_D2DBitmap != null)
+            {
+                m_D2DBitmap.Dispose();
+                m_D2DBitmap = null;
+            }
         }
 
         private void LoadBitmap(string filePath)
@@ -1474,7 +1479,11 @@ namespace GameEngine
         public void Dispose()
         {
             //This is the destructor
-            m_TextFormat.Dispose();
+            if (m_TextFormat != null)
+            {
+                m_TextFormat.Dispose();
+                m_TextFormat = null;
+            }
         }
 
         private void CreateFont(string fontName, float size)
@@ -1546,6 +1555,19 @@ namespace GameEngine
 
         private void Initialize(ButtonCallback callback, string text, Rectanglef rectangle)
         {
+            //Allowing this would needlessly lengthen the update time.
+            if (rectangle.Width < 1)
+            {
+                GAME_ENGINE.LogWarning("A button was given a WIDTH of 0 or less. It has been inverted.");
+                rectangle.Width *= -1;
+            }
+
+            if (rectangle.Height < 1)
+            {
+                GAME_ENGINE.LogWarning("A button was given a HEIGHT of 0 or less. It has been inverted.");
+                rectangle.Height *= -1;
+            }
+
             m_Text = text;
             m_Rectangle = rectangle;
             m_Callback = callback;
@@ -1557,13 +1579,19 @@ namespace GameEngine
             m_Font = m_DefaultFont;
         }
 
+        public override void Dispose()
+        {
+            //Only the default font was created by us.
+            if (m_DefaultFont != null)
+            {
+                m_DefaultFont.Dispose();
+                m_DefaultFont = null;
+            } 
+        }
+
         public override void GameEnd()
         {
-            m_DefaultFont.Dispose();
-
-            if (m_Bitmap != null)
-                m_Bitmap.Dispose();
-
+            Dispose();
             base.GameEnd();
         }
 
@@ -1803,7 +1831,7 @@ namespace GameEngine
 
         public void Dispose()
         {
-
+            m_WaveFormat = null;
         }
 
         public void SetVolume(float volume)

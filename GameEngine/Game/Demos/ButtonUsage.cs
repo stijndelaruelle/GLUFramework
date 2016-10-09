@@ -20,7 +20,7 @@ namespace GameEngine
             //Everything that has to happen when the game starts happens here.
             //F.e. initializing objects.
 
-            m_Button = new Button(CallBack);
+            m_Button = new Button(CallBack, "Omgekeerd", 100, 100, -50, -50);
             m_Bitmap = new Bitmap("images/plane.png");
             m_Font = new Font("scorefont.TTF", 16);
             m_Font.SetVerticalAlignment(Font.Alignment.Center);
@@ -31,6 +31,8 @@ namespace GameEngine
 
         public override void GameEnd()
         {
+            m_Button.Dispose();
+
             //Clean up unmanaged objects here (F.e. bitmaps & fonts)
 
             //For example:
