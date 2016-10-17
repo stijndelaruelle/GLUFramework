@@ -317,6 +317,11 @@ namespace GameEngine
         {
             return new Vector2(vec1.X + vec2.X, vec1.Y + vec2.Y);
         }
+
+        public static Vector2 operator -(Vector2 vec1, Vector2 vec2)
+        {
+            return new Vector2(vec1.X - vec2.X, vec1.Y - vec2.Y);
+        }
     }
 
     public struct Vector2f
@@ -349,6 +354,11 @@ namespace GameEngine
         public static Vector2f operator +(Vector2f vec1, Vector2f vec2)
         {
             return new Vector2f(vec1.X + vec2.X, vec1.Y + vec2.Y);
+        }
+
+        public static Vector2f operator -(Vector2f vec1, Vector2f vec2)
+        {
+            return new Vector2f(vec1.X - vec2.X, vec1.Y - vec2.Y);
         }
     }
 
@@ -428,8 +438,8 @@ namespace GameEngine
         private float m_Angle = 0.0f;
 
         //Camera properties
-        private Vector2f m_CameraPosition;
-        private float m_CameraAngle;
+        //private Vector2f m_CameraPosition;
+        //private float m_CameraAngle;
 
         //Default properties
         private SolidColorBrush m_CurrentBrush;
@@ -438,6 +448,7 @@ namespace GameEngine
         //For deltaTime calculation
         private Stopwatch m_Stopwatch;
         private float m_LastDeltaTime = 0.0f;
+        private int m_VSync = 1;
 
         //To force students to draw only in the paint function!
         private bool m_CanIPaint = false;
@@ -593,12 +604,12 @@ namespace GameEngine
 
                 m_RenderTarget.EndDraw();
 
-                m_SwapChain.Present(1, PresentFlags.None); //1 for VSync
+                m_SwapChain.Present(m_VSync, PresentFlags.None); //1 for VSync
 
                 //Add & remove GameObjects from the list
                 UpdateGameObjectList();
 
-                m_LastDeltaTime = m_Stopwatch.ElapsedMilliseconds / 1000.0f;
+                m_LastDeltaTime = (float)(m_Stopwatch.Elapsed.TotalMilliseconds / 1000.0);
                 m_Stopwatch.Restart();
             });
         }
@@ -613,7 +624,7 @@ namespace GameEngine
             return m_CanIPaint;
         }
 
-        public void UpdateGameObjectList()
+        private void UpdateGameObjectList()
         {
             foreach (GameObject go in m_SubscribingGameObjects)
                 m_GameObjects.Add(go);
@@ -655,6 +666,14 @@ namespace GameEngine
         public int GetScreenHeight()
         {
             return m_Height;
+        }
+
+        public bool GetVSync()
+        {
+            if (m_VSync == 0)
+                return false;
+            else
+                return true;
         }
 
         public void SetTitle(string title)
@@ -701,6 +720,14 @@ namespace GameEngine
         public void SetBackgroundColor(Color color)
         {
             SetBackgroundColor(color.R, color.G, color.B);
+        }
+
+        public void SetVSync(bool state)
+        {
+            if (state == true)
+                m_VSync = 1;
+            else
+                m_VSync = 0;
         }
 
         //Roation
@@ -857,7 +884,7 @@ namespace GameEngine
             ResetTransformMatrix();
         }
 
-        public void DrawRoundedRectangle(Rectanglef rect, Vector2 radius, int strokeWidth)
+        public void DrawRoundedRectangle(Rectanglef rect, Vector2f radius, int strokeWidth)
         {
             DrawRoundedRectangle(rect.X, rect.Y, rect.Width, rect.Height, radius.X, radius.Y, strokeWidth);
         }
@@ -1522,6 +1549,10 @@ namespace GameEngine
         private ButtonCallback m_Callback;
 
         //Extra settings
+        private bool m_ShowForeground = true;
+        private bool m_ShowBackground = true;
+        private bool m_ShowBorder = true;
+
         private Color m_ForegroundColor = Color.Black;
         private Color m_BackgroundColor = Color.White;
         private Color m_BorderColor = Color.Black;
@@ -1534,8 +1565,8 @@ namespace GameEngine
         private Color m_ClickBackgroundColor = new Color(200, 200, 200);
         private Color m_ClickBorderColor = Color.Black;
 
-        private Vector2f m_CornerRadius = new Vector2f(0.0f, 0.0f);
-
+        private Vector2f m_BorderCornerRadius = new Vector2f(0.0f, 0.0f);
+        private int m_BorderWidth = 1;
 
         //Functions
         public Button(ButtonCallback callback) : base()
@@ -1646,43 +1677,56 @@ namespace GameEngine
                 borderColor = m_ClickBorderColor;
             }
 
+            //Background
             if (m_Bitmap != null)
             {
                 DrawBitmapButton();
             }
             else
             {
-                if (m_CornerRadius.X == 0 && m_CornerRadius.Y == 0)
-                    DrawRectangleButton(bgColor, borderColor);
+                if (m_BorderCornerRadius.X == 0 && m_BorderCornerRadius.Y == 0)
+                {
+                    if (m_ShowBackground) { DrawRectangleButton(bgColor); }
+                    if (m_ShowBorder)     { DrawRectangleButtonBorder(borderColor); }
+                }
                 else
-                    DrawRoundedRectangleButton(bgColor, borderColor);
+                {
+                    if (m_ShowBackground) { DrawRoundedRectangleButton(bgColor); }
+                    if (m_ShowBorder)     { DrawRoundedRectangleButtonBorder(borderColor); }
+                }
             }
 
             //Text
-            GAME_ENGINE.SetColor(fgColor);
-            GAME_ENGINE.DrawString(m_Font, m_Text, m_Rectangle);
+            if (m_ShowForeground)
+            {
+                GAME_ENGINE.SetColor(fgColor);
+                GAME_ENGINE.DrawString(m_Font, m_Text, m_Rectangle);
+            }
         }
 
-        private void DrawRectangleButton(Color backgroundColor, Color borderColor)
+
+        private void DrawRectangleButton(Color backgroundColor)
         {
-            //Background
             GAME_ENGINE.SetColor(backgroundColor);
             GAME_ENGINE.FillRectangle(m_Rectangle);
-
-            //Border
-            GAME_ENGINE.SetColor(borderColor);
-            GAME_ENGINE.DrawRectangle(m_Rectangle);
         }
 
-        private void DrawRoundedRectangleButton(Color backgroundColor, Color borderColor)
+        private void DrawRectangleButtonBorder(Color borderColor)
         {
-            //Background
-            GAME_ENGINE.SetColor(backgroundColor);
-            GAME_ENGINE.FillRoundedRectangle(m_Rectangle, m_CornerRadius);
-
-            //Border
             GAME_ENGINE.SetColor(borderColor);
-            GAME_ENGINE.DrawRoundedRectangle(m_Rectangle, m_CornerRadius);
+            GAME_ENGINE.DrawRectangle(m_Rectangle, m_BorderWidth);
+        }
+
+        private void DrawRoundedRectangleButton(Color backgroundColor)
+        {
+            GAME_ENGINE.SetColor(backgroundColor);
+            GAME_ENGINE.FillRoundedRectangle(m_Rectangle, m_BorderCornerRadius);
+        }
+
+        private void DrawRoundedRectangleButtonBorder(Color borderColor)
+        {
+            GAME_ENGINE.SetColor(borderColor);
+            GAME_ENGINE.DrawRoundedRectangle(m_Rectangle, m_BorderCornerRadius, m_BorderWidth);
         }
 
         private void DrawBitmapButton()
@@ -1722,6 +1766,22 @@ namespace GameEngine
         }
 
 
+        public void ShowForeground(bool state)
+        {
+            m_ShowForeground = state;
+        }
+
+        public void ShowBackground(bool state)
+        {
+            m_ShowBackground = state;
+        }
+
+        public void ShowBorder(bool state)
+        {
+            m_ShowBorder = state;
+        }
+
+
         public void SetForegroundColor(Color color)
         {
             m_ForegroundColor = color;
@@ -1737,6 +1797,7 @@ namespace GameEngine
             m_BorderColor = color;
         }
 
+
         public void SetHoverForegroundColor(Color color)
         {
             m_HoverForegroundColor = color;
@@ -1751,6 +1812,7 @@ namespace GameEngine
         {
             m_HoverBorderColor = color;
         }
+
 
         public void SetClickForegroundColor(Color color)
         {
@@ -1778,9 +1840,14 @@ namespace GameEngine
             m_Font = font;
         }
 
-        public void SetCornerRadius(Vector2f radius)
+        public void SetBorderCornerRadius(Vector2f radius)
         {
-            m_CornerRadius = radius;
+            m_BorderCornerRadius = radius;
+        }
+
+        public void SetBorderWidth(int width)
+        {
+            m_BorderWidth = width;
         }
     }
 
@@ -1801,7 +1868,11 @@ namespace GameEngine
 
         public Audio(string filePath)
         {
-            LoadAudio("../../Assets/" + filePath);
+            #if DEBUG
+                LoadAudio("../../Assets/" + filePath);
+            #else
+                LoadAudio("./Assets/" + filePath);
+            #endif
         }
 
         private void LoadAudio(string filePath)
