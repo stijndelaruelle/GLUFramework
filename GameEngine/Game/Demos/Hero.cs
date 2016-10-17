@@ -14,12 +14,12 @@ namespace GameEngine
         private Vector2 m_Position = new Vector2(0, 0);
         private float m_Speed = 200.0f;
 
-        public Hero(int x, int y)
+        public override void GameStart()
         {
-            m_Position.X = x;
-            m_Position.Y = y;
+            m_Position.X = 50;
+            m_Position.Y = 50;
 
-            m_Bitmap = new Bitmap("../../jazz.png");
+            m_Bitmap = new Bitmap("jazz.png");
             m_Font = new Font("Times New Roman", 15);
         }
 

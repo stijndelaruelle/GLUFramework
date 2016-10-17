@@ -25,7 +25,7 @@ namespace GameEngine
         {
             // Set the required values
             GAME_ENGINE.SetTitle("Televisie");
-            GAME_ENGINE.SetIcon("../../Assets/icon.ico");
+            GAME_ENGINE.SetIcon("icon.ico");
 
             // Set the optional values
             GAME_ENGINE.SetWidth(m_ScreenSize.X);

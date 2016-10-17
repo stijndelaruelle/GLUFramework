@@ -36,11 +36,11 @@ namespace GameEngine
 
             Reset();
 
-            m_Song = new Audio("07_billy_talent_-_crooked_minds.mp3");
-            m_Song.SetLooping(true);
-            m_Song.SetVolume(1.0f);
-            GameEngine.GetInstance().PlayAudio(m_Song);
-            GameEngine.GetInstance().SetVolume(1.0f);
+            //m_Song = new Audio("07_billy_talent_-_crooked_minds.mp3");
+            //m_Song.SetLooping(true);
+            //m_Song.SetVolume(1.0f);
+            //GameEngine.GetInstance().PlayAudio(m_Song);
+            //GameEngine.GetInstance().SetVolume(1.0f);
         }
 
         public void Update()

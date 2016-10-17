@@ -46,7 +46,7 @@ namespace GameEngine
         {
             // Set the required values
             GAME_ENGINE.SetTitle("Random game from 2011");
-            GAME_ENGINE.SetIcon("../../Assets/icon.ico");
+            GAME_ENGINE.SetIcon("icon.ico");
 
             // Set the optional values
             GAME_ENGINE.SetWidth(640);
