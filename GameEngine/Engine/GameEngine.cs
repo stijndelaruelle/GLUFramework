@@ -451,7 +451,10 @@ namespace GameEngine
         private int m_Width = 800;
         private int m_Height = 600;
         private SharpDX.Color m_ClearColor = new SharpDX.Color(255, 255, 255);
+
         private float m_Angle = 0.0f;
+        private Vector2f m_Scale = new Vector2f(1.0f, 1.0f);
+
         private bool m_DisposeAtEndOfFrame = false;
 
         //Camera properties
@@ -760,11 +763,19 @@ namespace GameEngine
         }
 
         //Rotation methods
+        public void SetRotation(float angle)
+        {
+            m_Angle = DegToRad(angle);
+        }
+
         public void Rotate(float angle)
         {
-            //Convert degrees to radians
-            float radAngle = (float)(angle * (Math.PI / 180.0f)); //1 degree = PI / 180.0f
-            m_Angle += radAngle;
+            m_Angle += DegToRad(angle);
+        }
+
+        private float DegToRad(float degAngle)
+        {
+            return (float)(degAngle * (Math.PI / 180.0f)); //1 degree = PI / 180.0f
         }
 
         public void ResetRotation()
@@ -772,13 +783,24 @@ namespace GameEngine
             m_Angle = 0.0f;
         }
 
-        private void SetTransformMatrix(Vector2f position, float angle, Vector2f rotateCenter)
+        public void SetScale(float x, float y)
+        {
+            m_Scale = new Vector2f(x, y);
+        }
+
+        public void ResetScale()
+        {
+            m_Scale = new Vector2f(1.0f, 1.0f);
+        }
+
+        private void SetTransformMatrix(Vector2f position, float angle, Vector2f scale, Vector2f transformCenter)
         {
             //Adjust the transform matrix
-            SharpDX.Matrix3x2 matRotate = SharpDX.Matrix3x2.Rotation(angle, new SharpDX.Vector2(rotateCenter.X, rotateCenter.Y));
+            SharpDX.Matrix3x2 matScale = SharpDX.Matrix3x2.Scaling(scale.X, scale.Y, new SharpDX.Vector2(0.0f, 0.0f)); //For now we only scale from the top left
+            SharpDX.Matrix3x2 matRotate = SharpDX.Matrix3x2.Rotation(angle, new SharpDX.Vector2(transformCenter.X * m_Scale.X, transformCenter.Y * m_Scale.Y)); //For now we only rotate around the center
             SharpDX.Matrix3x2 matTranslate = SharpDX.Matrix3x2.Translation(position.X, position.Y);
 
-            m_RenderTarget.Transform = matRotate * matTranslate;
+            m_RenderTarget.Transform = matScale * matRotate * matTranslate;
         }
 
         private void ResetTransformMatrix()
@@ -829,7 +851,7 @@ namespace GameEngine
             //Adjust the transform matrix
             float width = endPointX - startPointX;
             float height = endPointY - startPointY;
-            SetTransformMatrix(new Vector2f(startPointX, startPointY), m_Angle, new Vector2f(width * 0.5f, height * 0.5f));
+            SetTransformMatrix(new Vector2f(startPointX, startPointY), m_Angle, m_Scale, new Vector2f(width * 0.5f, height * 0.5f));
 
             RawVector2 p1 = new RawVector2(0.0f, 0.0f);
             RawVector2 p2 = new RawVector2(width, height);
@@ -862,7 +884,7 @@ namespace GameEngine
                 return;
 
             //Adjust the transform matrix
-            SetTransformMatrix(new Vector2f(x, y), m_Angle, new Vector2f(width * 0.5f, height * 0.5f));
+            SetTransformMatrix(new Vector2f(x, y), m_Angle, m_Scale, new Vector2f(width * 0.5f, height * 0.5f));
 
             RawRectangleF rect = new RawRectangleF(0.0f, 0.0f, width, height);
             m_RenderTarget.DrawRectangle(rect, m_CurrentBrush, strokeWidth);
@@ -883,7 +905,7 @@ namespace GameEngine
                 return;
 
             //Adjust the transform matrix
-            SetTransformMatrix(new Vector2f(x, y), m_Angle, new Vector2f(width * 0.5f, height * 0.5f));
+            SetTransformMatrix(new Vector2f(x, y), m_Angle, m_Scale, new Vector2f(width * 0.5f, height * 0.5f));
 
             //Actually render
             RawRectangleF rect = new RawRectangleF(0.0f, 0.0f, width, height);
@@ -915,7 +937,7 @@ namespace GameEngine
                 return;
 
             //Adjust the transform matrix
-            SetTransformMatrix(new Vector2f(x, y), m_Angle, new Vector2f(width * 0.5f, height * 0.5f));
+            SetTransformMatrix(new Vector2f(x, y), m_Angle, m_Scale, new Vector2f(width * 0.5f, height * 0.5f));
 
             RawRectangleF rect = new RawRectangleF(0.0f, 0.0f, width, height);
 
@@ -942,7 +964,7 @@ namespace GameEngine
                 return;
 
             //Adjust the transform matrix
-            SetTransformMatrix(new Vector2f(x, y), m_Angle, new Vector2f(width * 0.5f, height * 0.5f));
+            SetTransformMatrix(new Vector2f(x, y), m_Angle, m_Scale, new Vector2f(width * 0.5f, height * 0.5f));
 
             RawRectangleF rect = new RawRectangleF(0.0f, 0.0f, width, height);
 
@@ -980,7 +1002,7 @@ namespace GameEngine
                 return;
 
             //Adjust the transform matrix
-            SetTransformMatrix(new Vector2f(x, y), m_Angle, new Vector2f(0.0f, 0.0f));
+            SetTransformMatrix(new Vector2f(x, y), m_Angle, m_Scale, new Vector2f(0.0f, 0.0f));
 
             Ellipse ellipse = new Ellipse(new RawVector2(0.0f, 0.0f), width, height);
             m_RenderTarget.DrawEllipse(ellipse, m_CurrentBrush, strokeWidth);
@@ -1002,7 +1024,7 @@ namespace GameEngine
 
 
             //Adjust the transform matrix
-            SetTransformMatrix(new Vector2f(x, y), m_Angle, new Vector2f(0.0f, 0.0f));
+            SetTransformMatrix(new Vector2f(x, y), m_Angle, m_Scale, new Vector2f(0.0f, 0.0f));
 
             Ellipse ellipse = new Ellipse(new RawVector2(0.0f, 0.0f), width, height);
             m_RenderTarget.FillEllipse(ellipse, m_CurrentBrush);
@@ -1038,7 +1060,7 @@ namespace GameEngine
             if (sourceHeight == 0) sourceHeight = D2DBitmap.Size.Height;
 
             //Adjust the transform matrix
-            SetTransformMatrix(new Vector2f(x, y), m_Angle, new Vector2f(sourceWidth * 0.5f, sourceHeight * 0.5f));
+            SetTransformMatrix(new Vector2f(x, y), m_Angle, m_Scale, new Vector2f(sourceWidth * 0.5f, sourceHeight * 0.5f));
 
             RawRectangleF sourceRect = new RawRectangleF(sourceX, sourceY, (sourceX + sourceWidth), (sourceY + sourceHeight));
             m_RenderTarget.DrawBitmap(D2DBitmap, m_CurrentBrush.Color.A, SharpDX.Direct2D1.BitmapInterpolationMode.NearestNeighbor, sourceRect);
@@ -1077,7 +1099,7 @@ namespace GameEngine
                 font = m_DefaultFont;
 
             //Adjust the transform matrix
-            SetTransformMatrix(new Vector2f(x, y), m_Angle, new Vector2f(width * 0.5f, height * 0.5f));
+            SetTransformMatrix(new Vector2f(x, y), m_Angle, m_Scale, new Vector2f(width * 0.5f, height * 0.5f));
 
             RawRectangleF rect = new RawRectangleF(0.0f, 0.0f, width, height);
             m_RenderTarget.DrawText(text, font.TextFormat, rect, m_CurrentBrush);
