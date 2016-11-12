@@ -1596,7 +1596,9 @@ namespace GameEngine
         //Required
         private string m_Text = "Button";
         private Rectanglef m_Rectangle = new Rectanglef(0, 0, 100, 25);
-        private ButtonCallback m_Callback;
+        private ButtonCallback m_OnClickCallback;
+        private ButtonCallback m_OnHoverBeginCallback;
+        private ButtonCallback m_OnHoverEndCallback;
 
         //Extra settings
         private bool m_ShowForeground = true;
@@ -1651,7 +1653,7 @@ namespace GameEngine
 
             m_Text = text;
             m_Rectangle = rectangle;
-            m_Callback = callback;
+            m_OnClickCallback = callback;
 
             m_DefaultFont = new Font("Arial", 12.0f);
             m_DefaultFont.SetHorizontalAlignment(Font.Alignment.Center);
@@ -1687,6 +1689,8 @@ namespace GameEngine
             Vector2 mousePosition = GAME_ENGINE.GetMousePosition();
 
             m_IsClicked = false;
+
+            bool wasHovering = m_IsHovering;
             m_IsHovering = (!(mousePosition.X < m_Rectangle.X ||
                               mousePosition.X > (m_Rectangle.X + m_Rectangle.Width) ||
                               mousePosition.Y < m_Rectangle.Y ||
@@ -1696,10 +1700,27 @@ namespace GameEngine
             {
                 m_IsClicked = GAME_ENGINE.GetMouseButton(0);
 
+                //We clicked
                 if (GAME_ENGINE.GetMouseButtonUp(0))
                 {
-                    if (m_Callback != null)
-                        m_Callback();
+                    if (m_OnClickCallback != null)
+                        m_OnClickCallback();
+                }
+
+                //We started hovering
+                if (wasHovering == false)
+                {
+                    if (m_OnHoverBeginCallback != null)
+                        m_OnHoverBeginCallback();
+                }
+            }
+            else
+            {
+                //We stopped hovering
+                if (wasHovering == true)
+                {
+                    if (m_OnHoverEndCallback != null)
+                        m_OnHoverEndCallback();
                 }
             }
         }
@@ -1792,10 +1813,21 @@ namespace GameEngine
 
 
         //Mutators
-        public void SetCallback(ButtonCallback callback)
+        public void SetClickCallback(ButtonCallback callback)
         {
-            m_Callback = callback;
+            m_OnClickCallback = callback;
         }
+
+        public void SetBeginHoverCallback(ButtonCallback callback)
+        {
+            m_OnHoverBeginCallback = callback;
+        }
+
+        public void SetEndHoverCallback(ButtonCallback callback)
+        {
+            m_OnHoverEndCallback = callback;
+        }
+
 
         public void SetText(string text)
         {
