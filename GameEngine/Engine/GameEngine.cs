@@ -278,11 +278,27 @@ namespace GameEngine
             set { m_B = value; }
         }
 
+        private int m_A;
+        public int A
+        {
+            get { return m_A; }
+            set { m_A = value; }
+        }
+
         public Color(int r, int g, int b)
         {
             m_R = r;
             m_G = g;
             m_B = b;
+            m_A = 255;
+        }
+
+        public Color(int r, int g, int b, int a)
+        {
+            m_R = r;
+            m_G = g;
+            m_B = b;
+            m_A = a;
         }
     }
 
@@ -760,10 +776,15 @@ namespace GameEngine
         //Draw methods
         public void SetColor(int r, int g, int b)
         {
+            SetColor(r, g, b, 255);
+        }
+
+        public void SetColor(int r, int g, int b, int a)
+        {
             if (!PaintCheck())
                 return;
 
-            SharpDX.Color color = new SharpDX.Color(r, g, b);
+            SharpDX.Color color = new SharpDX.Color(r, g, b, a);
 
             m_CurrentBrush.Dispose();
             m_CurrentBrush = new SolidColorBrush(m_RenderTarget, color);
@@ -771,7 +792,15 @@ namespace GameEngine
 
         public void SetColor(Color color)
         {
-            SetColor(color.R, color.G, color.B);
+            SetColor(color.R, color.G, color.B, color.A);
+        }
+
+        public Color GetColor()
+        {
+            RawColor4 sharpDXColor = m_CurrentBrush.Color;
+            Color color = new Color((int)(sharpDXColor.R * 255), (int)(sharpDXColor.G * 255), (int)(sharpDXColor.B * 255), (int)(sharpDXColor.A * 255));
+
+            return color;
         }
 
         //Line
@@ -995,7 +1024,7 @@ namespace GameEngine
             SetTransformMatrix(new Vector2f(x, y), m_Angle, new Vector2f(sourceWidth * 0.5f, sourceHeight * 0.5f));
 
             RawRectangleF sourceRect = new RawRectangleF(sourceX, sourceY, (sourceX + sourceWidth), (sourceY + sourceHeight));
-            m_RenderTarget.DrawBitmap(D2DBitmap, 1.0f, SharpDX.Direct2D1.BitmapInterpolationMode.NearestNeighbor, sourceRect);
+            m_RenderTarget.DrawBitmap(D2DBitmap, m_CurrentBrush.Color.A, SharpDX.Direct2D1.BitmapInterpolationMode.NearestNeighbor, sourceRect);
 
             //Reset the transform matrix
             ResetTransformMatrix();
@@ -1390,13 +1419,17 @@ namespace GameEngine
             m_GameEngine = GameEngine.GetInstance();
             m_GameEngine.SubscribeGameObject(this);
         }
-        public virtual void Dispose() { }
+
+        public virtual void Dispose()
+        {
+            m_GameEngine.UnsubscribeGameObject(this);
+        }
 
         public virtual void GameInitialize() { }
         public virtual void GameStart() { }
         public virtual void GameEnd()
         {
-            m_GameEngine.UnsubscribeGameObject(this);
+            Dispose();
         }
         public virtual void Update() { }
         public virtual void Paint() { }

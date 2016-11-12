@@ -42,16 +42,16 @@ namespace GameEngine
 
         public override void Update()
         {
-            if (m_Button.IsActive() == false)
-            {
-                m_Timer += GAME_ENGINE.GetDeltaTime();
+            //if (m_Button.IsActive() == false)
+            //{
+            //    m_Timer += GAME_ENGINE.GetDeltaTime();
 
-                if (m_Timer > 1.0f)
-                {
-                    m_Button.SetActive(true);
-                    m_Timer = 0.0f;
-                }
-            }
+            //    if (m_Timer > 1.0f)
+            //    {
+            //        m_Button.SetActive(true);
+            //        m_Timer = 0.0f;
+            //    }
+            //}
         }
 
         public override void Paint()
@@ -71,6 +71,10 @@ namespace GameEngine
             GAME_ENGINE.PlayAudio(m_ButtonClick);
 
             m_Button.SetActive(false);
+            m_Button.Dispose();
+            m_Button = null;
+
+            //m_Button.SetActive(false);
         }
     }
 }
