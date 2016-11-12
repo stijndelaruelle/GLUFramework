@@ -20,7 +20,7 @@ namespace GameEngine
             //Everything that has to happen when the game starts happens here.
             //F.e. initializing objects.
 
-            m_Button = new Button(CallBack, "Omgekeerd", 100, 100, -50, -50);
+            m_Button = new Button(CallBack, "QUIT", 100, 100, -50, -50);
             m_Bitmap = new Bitmap("images/plane.png");
             m_Font = new Font("scorefont.TTF", 16);
             m_Font.SetVerticalAlignment(Font.Alignment.Center);
@@ -67,12 +67,13 @@ namespace GameEngine
 
         private void CallBack()
         {
-            GAME_ENGINE.Log("Clicked!");
-            GAME_ENGINE.PlayAudio(m_ButtonClick);
+            GAME_ENGINE.Quit();
+            //GAME_ENGINE.Log("Clicked!");
+            //GAME_ENGINE.PlayAudio(m_ButtonClick);
 
-            m_Button.SetActive(false);
-            m_Button.Dispose();
-            m_Button = null;
+            //m_Button.SetActive(false);
+            //m_Button.Dispose();
+            //m_Button = null;
 
             //m_Button.SetActive(false);
         }

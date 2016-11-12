@@ -17,7 +17,7 @@ namespace GameEngine
                 return;
 
             //new XYZ(); //XYZ implements AbstractGame and subscribes himself to the game engine
-            new Transparancy_Test();
+            new ButtonUsage();
 
             instance.Run();
 

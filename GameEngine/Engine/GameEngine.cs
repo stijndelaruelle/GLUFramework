@@ -452,6 +452,7 @@ namespace GameEngine
         private int m_Height = 600;
         private SharpDX.Color m_ClearColor = new SharpDX.Color(255, 255, 255);
         private float m_Angle = 0.0f;
+        private bool m_DisposeAtEndOfFrame = false;
 
         //Camera properties
         //private Vector2f m_CameraPosition;
@@ -484,13 +485,14 @@ namespace GameEngine
         public void Dispose()
         {
             //This is the destructor
-            for (int i = m_GameObjects.Count - 1; i >= 0; --i)
+            for (int i = 0; i < m_GameObjects.Count; ++i)
                 m_GameObjects[i].GameEnd();
 
             m_GameObjects.Clear();
             m_SubscribingGameObjects.Clear();
             m_UnsubscribingGameObjects.Clear();
 
+            m_RenderForm.Close();
             m_RenderForm.Dispose();
 
             m_SwapChain.Dispose();
@@ -627,7 +629,18 @@ namespace GameEngine
 
                 m_LastDeltaTime = (float)(m_Stopwatch.Elapsed.TotalMilliseconds / 1000.0);
                 m_Stopwatch.Restart();
+
+                //Quit the game if requested
+                if (m_DisposeAtEndOfFrame)
+                {
+                    Dispose();
+                }
             });
+        }
+
+        public void Quit()
+        {
+            m_DisposeAtEndOfFrame = true;
         }
 
         private bool PaintCheck()
@@ -746,7 +759,7 @@ namespace GameEngine
                 m_VSync = 0;
         }
 
-        //Roation
+        //Rotation methods
         public void Rotate(float angle)
         {
             //Convert degrees to radians
@@ -773,7 +786,11 @@ namespace GameEngine
             m_RenderTarget.Transform = SharpDX.Matrix3x2.Identity;
         }
 
-        //Draw methods
+        //-------------------
+        // Drawing methods
+        //-------------------
+
+        //Color methods
         public void SetColor(int r, int g, int b)
         {
             SetColor(r, g, b, 255);
@@ -1650,7 +1667,9 @@ namespace GameEngine
             {
                 m_DefaultFont.Dispose();
                 m_DefaultFont = null;
-            } 
+            }
+
+            base.Dispose();
         }
 
         public override void GameEnd()
