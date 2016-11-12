@@ -230,7 +230,7 @@ namespace GameEngine
         //Alt = 262144
     }
 
-    public class Color
+    public struct Color
     {
         public static Color White
         {
