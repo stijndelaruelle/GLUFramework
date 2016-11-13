@@ -252,9 +252,25 @@ namespace GameEngine
         {
             get { return new Color(0, 0, 255); }
         }
+        public static Color Yellow
+        {
+            get { return new Color(255, 255, 0); }
+        }
+        public static Color Cyan
+        {
+            get { return new Color(0, 255, 255); }
+        }
+        public static Color Magenta
+        {
+            get { return new Color(255, 0, 255); }
+        }
         public static Color Gray
         {
             get { return new Color(128, 128, 128); }
+        }
+        public static Color AppelBlauwZeeGroen
+        {
+            get { return new Color(0, 167, 141); }
         }
 
         private int m_R;
@@ -762,7 +778,7 @@ namespace GameEngine
                 m_VSync = 0;
         }
 
-        //Rotation methods
+        //Transformation methods
         public void SetRotation(float angle)
         {
             m_Angle = DegToRad(angle);
@@ -807,6 +823,7 @@ namespace GameEngine
         {
             m_RenderTarget.Transform = SharpDX.Matrix3x2.Identity;
         }
+
 
         //-------------------
         // Drawing methods
