@@ -12,7 +12,7 @@ namespace GameEngine
         public override void GameInitialize()
         {
             // Set the required values
-            GAME_ENGINE.SetTitle("Canvas v1.0.3");
+            GAME_ENGINE.SetTitle("Canvas v1.1.0");
             GAME_ENGINE.SetIcon("icon.ico");
 
             // Set the optional values
