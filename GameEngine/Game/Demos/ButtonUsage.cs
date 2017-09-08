@@ -9,22 +9,27 @@ namespace GameEngine
     public class ButtonUsage : AbstractGame
     {
         private Button m_Button;
+        private Bitmap m_ButtonBitmap;
+
         private Bitmap m_Bitmap;
         private Font m_Font;
         private Audio m_ButtonClick;
-
-        private float m_Timer; 
 
         public override void GameStart()
         {
             //Everything that has to happen when the game starts happens here.
             //F.e. initializing objects.
 
-            m_Button = new Button(OnClickCallBack, "QUIT", 100, 100, -50, -50);
-            m_Button.SetBeginHoverCallback(OnHoverBeginCallback);
-            m_Button.SetEndHoverCallback(OnHoverEndCallback);
+            m_Button = new Button(OnClickCallBackNoArgs, "QUIT", 150, 50, 150, 50);
+            m_Button.SetClickCallback(OnClickCallBack, "callback with args");
+            m_Button.SetBeginHoverCallback(OnHoverBeginCallback, "begin hover");
+            m_Button.SetEndHoverCallback(OnHoverEndCallback, "end hover");
+
+            m_ButtonBitmap = new Bitmap("button.png");
+            m_Button.SetBitmap(m_ButtonBitmap);
 
             m_Bitmap = new Bitmap("images/plane.png");
+
             m_Font = new Font("scorefont.TTF", 16);
             m_Font.SetVerticalAlignment(Font.Alignment.Center);
             m_Font.SetHorizontalAlignment(Font.Alignment.Center);
@@ -59,30 +64,41 @@ namespace GameEngine
 
         public override void Paint()
         {
-            GAME_ENGINE.SetColor(Color.Green);
-            GAME_ENGINE.DrawString(m_Font, "Hallo", 100, 100, 200, 200);
+            GAME_ENGINE.DrawLine(0, 0, 200, 100, 1);
+            GAME_ENGINE.DrawLine(0, 10, 200, 110, 2);
+            GAME_ENGINE.DrawLine(0, 20, 200, 120, 3);
+            GAME_ENGINE.DrawLine(0, 30, 200, 130, 4);
+            GAME_ENGINE.DrawLine(0, 40, 200, 140, 5);
 
-            GAME_ENGINE.SetColor(Color.Red);
-            GAME_ENGINE.Rotate(45);
-            GAME_ENGINE.DrawString(m_Font, "Hallo", 100, 100, 200, 200);
-            GAME_ENGINE.Rotate(-45);
+            //GAME_ENGINE.SetColor(Color.Green);
+            //GAME_ENGINE.DrawString(m_Font, "Hallo", 100, 100, 200, 200);
+
+            //GAME_ENGINE.SetColor(Color.Red);
+            //GAME_ENGINE.Rotate(45);
+            //GAME_ENGINE.DrawString(m_Font, "Hallo", 100, 100, 200, 200);
+            //GAME_ENGINE.Rotate(-45);
         }
 
-        private void OnClickCallBack()
+        private void OnClickCallBackNoArgs()
         {
             //GAME_ENGINE.Quit();
-            GAME_ENGINE.Log("Clicked!");
+            GAME_ENGINE.Log("Callback without args");
             GAME_ENGINE.PlayAudio(m_ButtonClick);
         }
 
-        private void OnHoverBeginCallback()
+        private void OnClickCallBack(params object[] args)
         {
-            GAME_ENGINE.Log("We begin hovering the button!");
+            GAME_ENGINE.Log(args[0].ToString());
         }
 
-        private void OnHoverEndCallback()
+        private void OnHoverBeginCallback(params object[] args)
         {
-            GAME_ENGINE.Log("We stop hovering the button!");
+            GAME_ENGINE.Log(args[0].ToString());
+        }
+
+        private void OnHoverEndCallback(params object[] args)
+        {
+            GAME_ENGINE.Log(args[0].ToString());
         }
     }
 }

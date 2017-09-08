@@ -28,8 +28,8 @@ namespace GameEngine
             GAME_ENGINE.SetIcon("icon.ico");
 
             // Set the optional values
-            GAME_ENGINE.SetWidth(m_ScreenSize.X);
-            GAME_ENGINE.SetHeight(m_ScreenSize.Y);
+            GAME_ENGINE.SetScreenWidth(m_ScreenSize.X);
+            GAME_ENGINE.SetScreenHeight(m_ScreenSize.Y);
             GAME_ENGINE.SetBackgroundColor(20, 20, 20); //The Unity background color
         }
 

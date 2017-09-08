@@ -738,7 +738,7 @@ namespace GameEngine
             #endif
         }
 
-        public void SetWidth(int width)
+        public void SetScreenWidth(int width)
         {
             if (width <= 0)
             {
@@ -749,7 +749,7 @@ namespace GameEngine
             m_Width = width;
         }
 
-        public void SetHeight(int height)
+        public void SetScreenHeight(int height)
         {
             if (height <= 0)
             {
@@ -862,6 +862,17 @@ namespace GameEngine
         //Line
         public void DrawLine(float startPointX, float startPointY, float endPointX, float endPointY)
         {
+            //Not using default parameters on purpose.
+            DrawLine(startPointX, startPointY, endPointX, endPointY, 1);
+        }
+
+        public void DrawLine(Vector2f startPoint, Vector2f endPoint)
+        {
+            DrawLine(startPoint.X, startPoint.Y, endPoint.X, endPoint.Y);
+        }
+
+        public void DrawLine(float startPointX, float startPointY, float endPointX, float endPointY, float strokeWidth)
+        {
             if (!PaintCheck())
                 return;
 
@@ -873,14 +884,14 @@ namespace GameEngine
             RawVector2 p1 = new RawVector2(0.0f, 0.0f);
             RawVector2 p2 = new RawVector2(width, height);
 
-            m_RenderTarget.DrawLine(p1, p2, m_CurrentBrush);
+            m_RenderTarget.DrawLine(p1, p2, m_CurrentBrush, strokeWidth);
 
             ResetTransformMatrix();
         }
 
-        public void DrawLine(Vector2f startPoint, Vector2f endPoint)
+        public void DrawLine(Vector2f startPoint, Vector2f endPoint, float strokeWidth)
         {
-            DrawLine(startPoint.X, startPoint.Y, endPoint.X, endPoint.Y);
+            DrawLine(startPoint.X, startPoint.Y, endPoint.X, endPoint.Y, strokeWidth);
         }
 
         //Rectangle
@@ -1622,7 +1633,8 @@ namespace GameEngine
 
     public class Button : GameObject
     {
-        public delegate void ButtonCallback();
+        public delegate void ButtonCallbackNoArgs();
+        public delegate void ButtonCallback(params object[] args);
 
         //State
         private Font m_DefaultFont;
@@ -1635,9 +1647,17 @@ namespace GameEngine
         //Required
         private string m_Text = "Button";
         private Rectanglef m_Rectangle = new Rectanglef(0, 0, 100, 25);
+
+        //Callbacks
+        private ButtonCallbackNoArgs m_OnClickCallbackNoArgs; //Only used to introduce students. Otherwise always use m_OnClickCallback
         private ButtonCallback m_OnClickCallback;
+        private object[] m_OnClickArgs;
+
         private ButtonCallback m_OnHoverBeginCallback;
+        private object[] m_OnHoverBeginArgs;
+
         private ButtonCallback m_OnHoverEndCallback;
+        private object[] m_OnHoverEndArgs;
 
         //Extra settings
         private bool m_ShowForeground = true;
@@ -1660,19 +1680,25 @@ namespace GameEngine
         private int m_BorderWidth = 1;
 
         //Functions
-        public Button(ButtonCallback callback) : base()
+        public Button(ButtonCallbackNoArgs callback) : base()
         {
-            Initialize(callback, "Button", new Rectanglef(0, 0, 100, 25));
+            InitializeNoArgs(callback, "Button", new Rectanglef(0, 0, 100, 25));
         }
 
-        public Button(ButtonCallback callback, string text, int x, int y, int width, int height) : base()
+        public Button(ButtonCallbackNoArgs callback, string text, int x, int y, int width, int height) : base()
         {
-            Initialize(callback, text, new Rectanglef(x, y, width, height));
+            InitializeNoArgs(callback, text, new Rectanglef(x, y, width, height));
         }
 
-        public Button(ButtonCallback callback, string text, Rectanglef rectangle) : base()
+        public Button(ButtonCallbackNoArgs callback, string text, Rectanglef rectangle) : base()
         {
-            Initialize(callback, text, rectangle);
+            InitializeNoArgs(callback, text, rectangle);
+        }
+
+        private void InitializeNoArgs(ButtonCallbackNoArgs callback, string text, Rectanglef rectangle)
+        {
+            m_OnClickCallbackNoArgs = callback;
+            Initialize(null, text, rectangle);
         }
 
         private void Initialize(ButtonCallback callback, string text, Rectanglef rectangle)
@@ -1700,6 +1726,7 @@ namespace GameEngine
 
             m_Font = m_DefaultFont;
         }
+
 
         public override void Dispose()
         {
@@ -1742,15 +1769,18 @@ namespace GameEngine
                 //We clicked
                 if (GAME_ENGINE.GetMouseButtonUp(0))
                 {
+                    if (m_OnClickCallbackNoArgs != null)
+                        m_OnClickCallbackNoArgs();
+
                     if (m_OnClickCallback != null)
-                        m_OnClickCallback();
+                        m_OnClickCallback(m_OnClickArgs);
                 }
 
                 //We started hovering
                 if (wasHovering == false)
                 {
                     if (m_OnHoverBeginCallback != null)
-                        m_OnHoverBeginCallback();
+                        m_OnHoverBeginCallback(m_OnHoverBeginArgs);
                 }
             }
             else
@@ -1759,7 +1789,7 @@ namespace GameEngine
                 if (wasHovering == true)
                 {
                     if (m_OnHoverEndCallback != null)
-                        m_OnHoverEndCallback();
+                        m_OnHoverEndCallback(m_OnHoverEndArgs);
                 }
             }
         }
@@ -1852,19 +1882,22 @@ namespace GameEngine
 
 
         //Mutators
-        public void SetClickCallback(ButtonCallback callback)
+        public void SetClickCallback(ButtonCallback callback, params object[] args)
         {
             m_OnClickCallback = callback;
+            m_OnClickArgs = args;
         }
 
-        public void SetBeginHoverCallback(ButtonCallback callback)
+        public void SetBeginHoverCallback(ButtonCallback callback, params object[] args)
         {
             m_OnHoverBeginCallback = callback;
+            m_OnHoverBeginArgs = args;
         }
 
-        public void SetEndHoverCallback(ButtonCallback callback)
+        public void SetEndHoverCallback(ButtonCallback callback, params object[] args)
         {
             m_OnHoverEndCallback = callback;
+            m_OnHoverEndArgs = args;
         }
 
 

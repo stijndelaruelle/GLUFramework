@@ -16,8 +16,8 @@ namespace GameEngine
             GAME_ENGINE.SetIcon("icon.ico");
 
             // Set the optional values
-            GAME_ENGINE.SetWidth(640);
-            GAME_ENGINE.SetHeight(480);
+            GAME_ENGINE.SetScreenWidth(640);
+            GAME_ENGINE.SetScreenHeight(480);
             GAME_ENGINE.SetBackgroundColor(0, 167, 141); //Appelblauwzeegroen
             //GAME_ENGINE.SetBackgroundColor(49, 77, 121); //The Unity background color
         }
