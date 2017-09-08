@@ -1680,28 +1680,39 @@ namespace GameEngine
         private int m_BorderWidth = 1;
 
         //Functions
+        public Button() : base()
+        {
+            Initialize(null, "Button", new Rectanglef(0, 0, 100, 25));
+        }
+
+        public Button(string text, int x, int y, int width, int height) : base()
+        {
+            Initialize(null, text, new Rectanglef(x, y, width, height));
+        }
+
+        public Button(string text, Rectanglef rectangle) : base()
+        {
+            Initialize(null, text, rectangle);
+        }
+
+
         public Button(ButtonCallbackNoArgs callback) : base()
         {
-            InitializeNoArgs(callback, "Button", new Rectanglef(0, 0, 100, 25));
+            Initialize(callback, "Button", new Rectanglef(0, 0, 100, 25));
         }
 
         public Button(ButtonCallbackNoArgs callback, string text, int x, int y, int width, int height) : base()
         {
-            InitializeNoArgs(callback, text, new Rectanglef(x, y, width, height));
+            Initialize(callback, text, new Rectanglef(x, y, width, height));
         }
 
         public Button(ButtonCallbackNoArgs callback, string text, Rectanglef rectangle) : base()
         {
-            InitializeNoArgs(callback, text, rectangle);
+            Initialize(callback, text, rectangle);
         }
 
-        private void InitializeNoArgs(ButtonCallbackNoArgs callback, string text, Rectanglef rectangle)
-        {
-            m_OnClickCallbackNoArgs = callback;
-            Initialize(null, text, rectangle);
-        }
 
-        private void Initialize(ButtonCallback callback, string text, Rectanglef rectangle)
+        private void Initialize(ButtonCallbackNoArgs callback, string text, Rectanglef rectangle)
         {
             //Allowing this would needlessly lengthen the update time.
             if (rectangle.Width < 1)
@@ -1718,7 +1729,7 @@ namespace GameEngine
 
             m_Text = text;
             m_Rectangle = rectangle;
-            m_OnClickCallback = callback;
+            m_OnClickCallbackNoArgs = callback;
 
             m_DefaultFont = new Font("Arial", 12.0f);
             m_DefaultFont.SetHorizontalAlignment(Font.Alignment.Center);
@@ -1882,6 +1893,11 @@ namespace GameEngine
 
 
         //Mutators
+        public void SetClickCallbackNoArgs(ButtonCallbackNoArgs callback)
+        {
+            m_OnClickCallbackNoArgs = callback;
+        }
+
         public void SetClickCallback(ButtonCallback callback, params object[] args)
         {
             m_OnClickCallback = callback;

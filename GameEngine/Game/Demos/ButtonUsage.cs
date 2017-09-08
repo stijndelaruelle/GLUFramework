@@ -20,7 +20,8 @@ namespace GameEngine
             //Everything that has to happen when the game starts happens here.
             //F.e. initializing objects.
 
-            m_Button = new Button(OnClickCallBackNoArgs, "QUIT", 150, 50, 150, 50);
+            m_Button = new Button("QUIT", 150, 50, 150, 50);
+            m_Button.SetClickCallbackNoArgs(OnClickCallBackNoArgs);
             m_Button.SetClickCallback(OnClickCallBack, "callback with args");
             m_Button.SetBeginHoverCallback(OnHoverBeginCallback, "begin hover");
             m_Button.SetEndHoverCallback(OnHoverEndCallback, "end hover");
