@@ -101,6 +101,7 @@
     <Compile Include="Game\Demos\PortedGame.cs" />
     <Compile Include="Game\Demos\Transparancy_Test.cs" />
     <Compile Include="Game\Demos\TVStuiter.cs" />
+    <Compile Include="Game\Demos\WordPuzzleSolver.cs" />
     <Compile Include="Game\XYZ.cs" />
     <Compile Include="Game\Demos\Hero.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

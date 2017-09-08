@@ -15,7 +15,7 @@ namespace GameEngine
 
         private Vector2f m_StartPosition;
         private Vector2 m_Size;
-        private int m_StartSpeed = 400;
+        private int m_StartSpeed = 250;
 
         private Vector2f m_Position;
         private int m_Speed;
@@ -125,14 +125,42 @@ namespace GameEngine
         {
             Rectanglef otherAABB = otherObj.GetAABB();
 
-            if (m_Position.Y > otherAABB.Y + otherAABB.Height - 5 && m_Direction.Y < 0)
-                m_Direction.Y *= -1;
+            ////Top collision
+            //if ((m_Position.Y + m_Size.Y) > otherAABB.Y &&
+            //    (m_Position.Y + m_Size.Y) < (otherAABB.Y + 5))
+            //{
+            //    m_Direction.Y *= -1;
+            //    m_Position.Y = otherAABB.Y - m_Size.Y;
 
-            else if (m_Position.Y + m_Size.Y < otherAABB.Y + 5 && m_Direction.Y > 0)
-                m_Direction.Y *= -1;
+            //    Console.WriteLine("Top collision");
+            //}
 
-            else
+            ////Bottom collision
+            //else if (m_Position.Y < (otherAABB.Y + otherAABB.Height) &&
+            //        (m_Position.Y > (otherAABB.Y + otherAABB.Height - 5)))
+            //{
+            //    m_Direction.Y *= -1;
+            //    m_Position.Y = otherAABB.Y + otherAABB.Height;
+
+            //    Console.WriteLine("Bottom collision");
+            //}
+
+            //Left
+            if (m_Position.X < (otherAABB.X + otherAABB.Width) && m_Direction.X < 0)
+            {
                 m_Direction.X *= -1;
+                m_Position.X = (otherAABB.X + otherAABB.Width);
+
+                Console.WriteLine("Left");
+            }
+
+            else if ((m_Position.X + m_Size.X) > otherAABB.X && m_Direction.X > 0)
+            {
+                m_Direction.X *= -1;
+                m_Position.X = otherAABB.X - m_Size.X;
+
+                Console.WriteLine("Right");
+            }
 
             m_Speed += 50;
             
